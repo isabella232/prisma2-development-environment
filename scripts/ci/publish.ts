@@ -6,6 +6,7 @@ import topo from 'batching-toposort'
 import { promises as fs } from 'fs'
 import arg from 'arg'
 import pMap from 'p-map'
+import semver from 'semver'
 
 export type Commit = {
   date: Date
@@ -239,6 +240,12 @@ function getPackagesAffectedByChange(
     return acc
   }, {})
 
+  // If photon.js is not yet part of it, it has to
+  // as we always need to release the same version of prisma2 and photonjs
+  if (!affectedPackages['@prisma/photon']) {
+    affectedPackages['@prisma/photon'] = packages['@prisma/photon']
+  }
+
   function addDependants(pkg: Package) {
     for (const dependency of pkg.usedBy) {
       if (!affectedPackages[dependency]) {
@@ -384,7 +391,7 @@ function intersection<T>(arr1: T[], arr2: T[]): T[] {
   return arr1.filter(value => arr2.includes(value))
 }
 
-function patch(version: string): string | null {
+function patchVersion(version: string): string | null {
   // Thanks 🙏 to https://github.com/semver/semver/issues/232#issuecomment-405596809
   const regex = /^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
 
@@ -396,6 +403,18 @@ function patch(version: string): string | null {
   }
 
   return null
+}
+
+async function patch(pkg: Package): Promise<string> {
+  const localVersion = pkg.version
+  // const npmVersion = await runResult('.', `npm info ${pkg.name} version`)
+
+  // const maxVersion = semver.maxSatisfying([localVersion, npmVersion], '*', {
+  //   loose: true,
+  //   includePrerelease: true,
+  // })
+
+  return patchVersion(localVersion)
 }
 
 async function publishPackages(
@@ -465,9 +484,7 @@ async function publishPackages(
           prisma2Version.includes('alpha') && isPrisma2OrPhoton
             ? 'alpha'
             : 'latest'
-        const newVersion = isPrisma2OrPhoton
-          ? prisma2Version
-          : patch(pkg.version)
+        const newVersion = isPrisma2OrPhoton ? prisma2Version : await patch(pkg)
 
         console.log(
           `\nPublishing ${chalk.magentaBright(
@@ -486,7 +503,7 @@ async function publishPackages(
         }
 
         await cmd(pkgDir, `pnpm version --no-git-version ${newVersion} -f`)
-        await cmd(pkgDir, `pnpm publish --tag ${tag}`)
+        await cmd(pkgDir, `pnpm publish --tag ${tag} || echo "Lol"`)
       },
       {
         concurrency: 1,
