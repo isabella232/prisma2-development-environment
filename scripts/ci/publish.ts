@@ -16,12 +16,22 @@ export type Commit = {
   parentCommits: string[]
 }
 
-async function getLatestChanges(allRepos: boolean): Promise<string[]> {
-  const commits = await Promise.all([
-    getLatestCommit('prisma2'),
-    getLatestCommit('lift'),
-    getLatestCommit('photonjs'),
-  ])
+async function getLatestChanges(
+  allRepos: boolean,
+  repo?: string,
+): Promise<string[]> {
+  if (repo && !['prisma2', 'lift', 'photonjs']) {
+    throw new Error(
+      `Provided repo ${repo} does not exist. Please choose either prisma2, lift or photonjs.`,
+    )
+  }
+  const commits = repo
+    ? [await getLatestCommit(repo)]
+    : await Promise.all([
+        getLatestCommit('prisma2'),
+        getLatestCommit('lift'),
+        getLatestCommit('photonjs'),
+      ])
 
   commits.sort((a, b) => {
     return a.date < b.date ? 1 : -1
@@ -325,6 +335,7 @@ async function publish() {
   const args = arg({
     '--publish': Boolean,
     '--all-repos': Boolean,
+    '--repo': String,
     '--dry-publish': Boolean,
     '--release': String,
   })
@@ -377,7 +388,7 @@ async function publish() {
     throw new Error(`Oops, there are circular dependencies: ${circles}`)
   }
 
-  const changes = await getLatestChanges(args['--all-repos'])
+  const changes = await getLatestChanges(args['--all-repos'], args['--repo'])
   if (!args['--publish']) {
     console.log(chalk.bold(`Changed files:`))
     console.log(changes.map(c => `  ${c}`).join('\n'))
