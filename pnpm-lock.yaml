@@ -2,13 +2,13 @@ importers:
   .:
     devDependencies:
       '@types/debug': 4.1.5
-      '@types/node': 12.12.11
-      arg: 4.1.1
+      '@types/node': 12.12.14
+      arg: 4.1.2
       batching-toposort: 1.2.0
       chalk: 3.0.0
       debug: 4.1.1
       del: 5.1.0
-      execa: 3.3.0
+      execa: 3.4.0
       globby: 10.0.1
       p-map: 3.0.0
       semver: 6.3.0
@@ -16,13 +16,13 @@ importers:
       typescript: 3.7.2
     specifiers:
       '@types/debug': ^4.1.5
-      '@types/node': ^12.12.11
-      arg: ^4.1.1
+      '@types/node': ^12.12.14
+      arg: ^4.1.2
       batching-toposort: ^1.2.0
       chalk: ^3.0.0
       debug: ^4.1.1
       del: ^5.1.0
-      execa: ^3.3.0
+      execa: ^3.4.0
       globby: ^10.0.1
       p-map: ^3.0.0
       semver: ^6.3.0
@@ -33,7 +33,7 @@ importers:
       '@prisma/fetch-engine': 'link:../photonjs/packages/fetch-engine'
       '@prisma/get-platform': 'link:../photonjs/packages/get-platform'
       '@prisma/ink-components': 'link:../prisma2/cli/ink-components'
-      '@prisma/studio-server': 0.151.0_typescript@3.7.2
+      '@prisma/studio-server': 0.155.0_typescript@3.7.2
       '@types/execa': 2.0.0
       adm-zip: 0.4.13
       ansi-escapes: 4.2.1
@@ -72,8 +72,8 @@ importers:
       '@prisma/generator-helper': 'link:../prisma2/cli/generator-helper'
       '@prisma/photon': 'link:../photonjs/packages/photon'
       '@prisma/sdk': 'link:../prisma2/cli/sdk'
-      '@prisma/studio': 0.151.0
-      '@prisma/studio-transports': 0.151.0_typescript@3.7.2
+      '@prisma/studio': 0.155.0
+      '@prisma/studio-transports': 0.155.0_typescript@3.7.2
       '@types/charm': 1.0.1
       '@types/debug': 4.1.5
       '@types/diff': 4.0.2
@@ -103,9 +103,9 @@ importers:
       '@prisma/ink-components': 'workspace:*'
       '@prisma/photon': 'workspace:*'
       '@prisma/sdk': 'workspace:*'
-      '@prisma/studio': 0.151.0
-      '@prisma/studio-server': 0.151.0
-      '@prisma/studio-transports': 0.151.0
+      '@prisma/studio': 0.155.0
+      '@prisma/studio-server': 0.155.0
+      '@prisma/studio-transports': 0.155.0
       '@types/charm': 1.0.1
       '@types/debug': 4.1.5
       '@types/diff': 4.0.2
@@ -500,9 +500,9 @@ importers:
       '@prisma/lift': 'link:../../../lift'
       '@prisma/photon': 'link:../../../photonjs/packages/photon'
       '@prisma/sdk': 'link:../sdk'
-      '@prisma/studio': 0.151.0
-      '@prisma/studio-server': 0.151.0_typescript@3.7.2
-      '@prisma/studio-transports': 0.151.0_typescript@3.7.2
+      '@prisma/studio': 0.155.0
+      '@prisma/studio-server': 0.155.0_typescript@3.7.2
+      '@prisma/studio-transports': 0.155.0_typescript@3.7.2
       '@sentry/node': 5.9.0
       '@types/debug': 4.1.5
       '@types/mocha': 5.2.7
@@ -533,9 +533,9 @@ importers:
       '@prisma/lift': 'workspace:*'
       '@prisma/photon': 'workspace:*'
       '@prisma/sdk': 'workspace:*'
-      '@prisma/studio': 0.151.0
-      '@prisma/studio-server': 0.151.0
-      '@prisma/studio-transports': 0.151.0
+      '@prisma/studio': 0.155.0
+      '@prisma/studio-server': 0.155.0
+      '@prisma/studio-transports': 0.155.0
       '@sentry/node': ^5.9.0
       '@types/debug': ^4.1.5
       '@types/mocha': ^5.2.7
@@ -788,6 +788,7 @@ packages:
     resolution:
       integrity: sha512-48TeqmbazjNU/65niiiJIJRc5JozB8acui1OS7bSd6PgxfuovWsvjfWSzlgx+gPFdVveNzUdpdIg5l56Pl5jqg==
   /@babel/helper-plugin-utils/7.0.0:
+    dev: true
     resolution:
       integrity: sha512-CYAOUCARwExnEixLdB6sDm2dIJ/YgEAKDM1MOeMeZu9Ld/bDgVo8aiWrXwcY7OBh+1Ea2uUcVRcxKk0GJvW7QA==
   /@babel/helper-regex/7.5.5:
@@ -911,14 +912,6 @@ packages:
       '@babel/core': ^7.0.0-0
     resolution:
       integrity: sha512-mgYj3jCcxug6KUcX4OBoOJz3CMrwRfQELPQ5560F70YQUBZB7uac9fqaWamKR1iWUzGiK2t0ygzjTScZnVz75g==
-  /@babel/plugin-proposal-optional-chaining/7.6.0:
-    dependencies:
-      '@babel/helper-plugin-utils': 7.0.0
-      '@babel/plugin-syntax-optional-chaining': 7.2.0
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    resolution:
-      integrity: sha512-kj4gkZ6qUggkprRq3Uh5KP8XnE1MdIO0J7MhdDX8+rAbB6dJ2UrensGIS+0NPZAaaJ1Vr0PN6oLUgXMU1uMcSg==
   /@babel/plugin-proposal-unicode-property-regex/7.7.0_@babel+core@7.7.2:
     dependencies:
       '@babel/core': 7.7.2
@@ -994,13 +987,6 @@ packages:
       '@babel/core': ^7.0.0-0
     resolution:
       integrity: sha512-bDe4xKNhb0LI7IvZHiA13kff0KEfaGX/Hv4lMA9+7TEc63hMNvfKo6ZFpXhKuEp+II/q35Gc4NoMeDZyaUbj9w==
-  /@babel/plugin-syntax-optional-chaining/7.2.0:
-    dependencies:
-      '@babel/helper-plugin-utils': 7.0.0
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    resolution:
-      integrity: sha512-HtGCtvp5Uq/jH/WNUPkK6b7rufnCPLLlDAFN7cmACoIjaOOiXxUt3SswU5loHqrhtqTsa/WoLQ1OQ1AGuZqaWA==
   /@babel/plugin-syntax-top-level-await/7.7.0_@babel+core@7.7.2:
     dependencies:
       '@babel/core': 7.7.2
@@ -2433,42 +2419,36 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-HBvNTQd85uOJMgEdYFflMEyuJntKgU8yEJB00nPUq3/VVHiwA7NOD2YNMmSvedtU0Qs60f5wXhaSJ4wsFdIWrA==
-  /@prisma/studio-server/0.151.0_typescript@3.7.2:
+  /@prisma/studio-server/0.155.0_typescript@3.7.2:
     dependencies:
-      '@prisma/studio': 0.151.0
-      '@prisma/studio-transports': 0.151.0_typescript@3.7.2
+      '@prisma/studio': 0.155.0
+      '@prisma/studio-transports': 0.155.0_typescript@3.7.2
       '@sentry/node': 5.9.0
       express: 4.17.1
       express-ws: 4.0.0_express@4.17.1
       typescript: 3.7.2
     peerDependencies:
       '@prisma/generator-helper': '*'
-      '@prisma/lift': '*'
       '@prisma/photon': '*'
       '@prisma/sdk': '*'
       typescript: '*'
     resolution:
-      integrity: sha512-n/mywumGZvVn2KwUUXJ0CjtjEbuq4RHT8mwudPQOKKKOklhsPyn0pCUJ8CBvZoZpyFDQQwKL/FGZyzuHrav8oQ==
-  /@prisma/studio-transports/0.151.0_typescript@3.7.2:
+      integrity: sha512-kjIpL2j51RKh8pV7slt9jBDaJi986CDDI2I5EN24SesVkxV/rl7/pWFEURHK/B+h1gYg1lRx3koFwg/2Cklxmg==
+  /@prisma/studio-transports/0.155.0_typescript@3.7.2:
     dependencies:
       '@prisma/sdk': 0.0.51
       '@sentry/node': 5.9.0
-      make-dir: 3.0.0
       prisma-db-introspection: 1.36.0-test.2
       strip-ansi: 5.2.0
-      temp-dir: 2.0.0
       typescript: 3.7.2
     peerDependencies:
-      '@prisma/lift': '*'
       '@prisma/photon': '*'
       typescript: '*'
     resolution:
-      integrity: sha512-tjPQ26v1r2wNOI/fvkDuhKv2gkpGlEY2kp/CSYavma8Q4o9LkMYGY2iE4kztdxTK37vai0/igWFDiMJ5w4XJhg==
-  /@prisma/studio/0.151.0:
-    dependencies:
-      '@babel/plugin-proposal-optional-chaining': 7.6.0
+      integrity: sha512-gNf0jzSiAYEn2mI6rI4O083BaGV9DkisGGNWpFqKNqa+YQ244tqaZBqeiH84HV7FqTq2NLDJ1NGvtVKFs03l4g==
+  /@prisma/studio/0.155.0:
     resolution:
-      integrity: sha512-1QjpMN+oKIzzUecO694keKNfHWF88T/vlbgt/HhC0VMGsnTgULDrRzxvV2rkcRYrvurX0MFIzkX/CDBEtWuEEg==
+      integrity: sha512-1JHNk9yOGDPEGHDcVJt14jSAWOlr4evYwB7El4wYaFvI6IVaf4EWbRqjJTiKdWaM3+oNXH33cI9KyWrvXd8W3w==
   /@samverschueren/stream-to-observable/0.3.0:
     dependencies:
       any-observable: 0.3.0
@@ -2750,6 +2730,10 @@ packages:
   /@types/node/12.12.11:
     resolution:
       integrity: sha512-O+x6uIpa6oMNTkPuHDa9MhMMehlxLAd5QcOvKRjAFsBVpeFWTOPnXbDvILvFgFFZfQ1xh1EZi1FbXxUix+zpsQ==
+  /@types/node/12.12.14:
+    dev: true
+    resolution:
+      integrity: sha512-u/SJDyXwuihpwjXy7hOOghagLEV1KdAST6syfnOk6QZAMzZuWZqXy5aYYZbh8Jdpd4escVFP0MvftHNDb9pruA==
   /@types/node/12.12.7:
     resolution:
       integrity: sha512-E6Zn0rffhgd130zbCbAr/JdXfXkoOUFAKNs/rF8qnafSJ8KYaA/j3oz7dcwal+lYjLA7xvdd5J4wdYpCTlP8+w==
@@ -3290,6 +3274,10 @@ packages:
   /arg/4.1.1:
     resolution:
       integrity: sha512-SlmP3fEA88MBv0PypnXZ8ZfJhwmDeIE3SP71j37AiXQBXYosPV0x6uISAaHYSlSVhmHOVkomen0tbGk6Anlebw==
+  /arg/4.1.2:
+    dev: true
+    resolution:
+      integrity: sha512-+ytCkGcBtHZ3V2r2Z06AncYO8jz46UEamcspGoU8lHcEbpn6J77QK0vdWvChsclg/tM5XIJC5tnjmPp7Eq6Obg==
   /argparse/1.0.10:
     dependencies:
       sprintf-js: 1.0.3
@@ -5506,6 +5494,23 @@ packages:
       node: ^8.12.0 || >=9.7.0
     resolution:
       integrity: sha512-j5Vit5WZR/cbHlqU97+qcnw9WHRCIL4V1SVe75VcHcD1JRBdt8fv0zw89b7CQHQdUHTt2VjuhcF5ibAgVOxqpg==
+  /execa/3.4.0:
+    dependencies:
+      cross-spawn: 7.0.1
+      get-stream: 5.1.0
+      human-signals: 1.1.1
+      is-stream: 2.0.0
+      merge-stream: 2.0.0
+      npm-run-path: 4.0.0
+      onetime: 5.1.0
+      p-finally: 2.0.1
+      signal-exit: 3.0.2
+      strip-final-newline: 2.0.0
+    dev: true
+    engines:
+      node: ^8.12.0 || >=9.7.0
+    resolution:
+      integrity: sha512-r9vdGQk4bmCuK1yKQu1KTwcT2zwfWdbdaXfCtAh+5nU/4fSX+JAb7vZGvI5naJrQlvONrEB20jeruESI69530g==
   /exit/0.1.2:
     dev: true
     engines:
@@ -6795,7 +6800,7 @@ packages:
       ansi-escapes: 4.3.0
       arrify: 1.0.1
       auto-bind: 2.1.1
-      chalk: 3.0.0-beta.2
+      chalk: 2.4.2
       cli-cursor: 2.1.0
       cli-truncate: 1.1.0
       is-ci: 2.0.0
@@ -11719,11 +11724,6 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-CnwOom06Oa+n4OvqnB/AvE2qAR0=
-  /temp-dir/2.0.0:
-    engines:
-      node: '>=8'
-    resolution:
-      integrity: sha512-aoBAniQmmwtcKp/7BzsH8Cxzv8OL736p7v1ihGb5e9DJ9kTwGWHrQrVB5+lfVDzfGrdRzXch+ig7LHaY1JTOrg==
   /temp-write/4.0.0:
     dependencies:
       graceful-fs: 4.2.3

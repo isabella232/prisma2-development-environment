@@ -230,10 +230,15 @@ function getCircularDependencies(packages: Packages): string[][] {
 function getPackagesAffectedByChange(
   packages: Packages,
   changes: string[],
+  isRelease: boolean,
 ): Packages {
-  const changedPackages = Object.values(packages).filter(p =>
-    changes.find(c => c.startsWith(path.dirname(p.path))),
-  )
+  const changedPackages = isRelease
+    ? Object.values(packages).filter(p =>
+        ['@prisma/photon', 'prisma2'].includes(p.name),
+      )
+    : Object.values(packages).filter(p =>
+        changes.find(c => c.startsWith(path.dirname(p.path))),
+      )
 
   const affectedPackages: Packages = changedPackages.reduce((acc, p) => {
     acc[p.name] = p
@@ -281,14 +286,11 @@ function getPublishOrder(packages: Packages): string[][] {
 }
 
 /**
- * Either takes the BUILDKITE_TAG env var for the new version or takes the max alpha version + 1
+ * Takes the max alpha version + 1
  * For now supporting 2.0.0-alpha.X
  * @param packages Locla package definitions
  */
 async function getNewPrisma2Version(packages: Packages): Promise<string> {
-  if (process.env.BUILDKITE_TAG) {
-    return process.env.BUILDKITE_TAG
-  }
   const localPrisma2Version = packages['prisma2'].version
   const localPhotonVersion = packages['@prisma/photon'].version
   const [remotePrisma2Version, remotePhotonVersion] = await Promise.all([
@@ -324,6 +326,7 @@ async function publish() {
     '--publish': Boolean,
     '--all-repos': Boolean,
     '--dry-publish': Boolean,
+    '--release': String,
   })
 
   const yarnVersion = await runResult('.', 'yarn --version')
@@ -335,6 +338,38 @@ async function publish() {
     )
   }
 
+  if (args['--release']) {
+    if (!semver.valid(args['--release'])) {
+      throw new Error(
+        `New release version ${chalk.bold.underline(
+          args['--release'],
+        )} is not a valid semver version.`,
+      )
+    }
+    const currentVersion = await runResult('.', 'npm info prisma2 version')
+    if (!semver.gt(args['--release'], currentVersion)) {
+      throw new Error(
+        `New release version ${chalk.bold.underline(
+          args['--release'],
+        )} is not greater than the current semver version ${chalk.bold.underline(
+          currentVersion,
+        )}`,
+      )
+    }
+    if (!args['--release'].includes('preview0')) {
+      throw new Error(
+        `New release version ${chalk.bold.underline(
+          args['--release'],
+        )} does not follow the preview naming scheme: ${chalk.bold.underline(
+          '2.0.0-preview0XX',
+        )}`,
+      )
+    }
+
+    // If there is --release, it's always also --publish
+    args['--publish'] = true
+  }
+
   const rawPackages = await getPackages()
   const packages = getPackageDependencies(rawPackages)
   const circles = getCircularDependencies(packages)
@@ -343,10 +378,16 @@ async function publish() {
   }
 
   const changes = await getLatestChanges(args['--all-repos'])
-  console.log(chalk.bold(`Changed files:`))
-  console.log(changes.map(c => `  ${c}`).join('\n'))
+  if (!args['--publish']) {
+    console.log(chalk.bold(`Changed files:`))
+    console.log(changes.map(c => `  ${c}`).join('\n'))
+  }
   // const changes = ['photonjs/packages/get-platform/readme.md']
-  const changedPackages = getPackagesAffectedByChange(packages, changes)
+  const changedPackages = getPackagesAffectedByChange(
+    packages,
+    changes,
+    Boolean(args['--release']),
+  )
 
   let publishOrder = getPublishOrder(changedPackages)
 
@@ -356,6 +397,7 @@ async function publish() {
       changedPackages,
       publishOrder,
       args['--dry-publish'],
+      args['--release'],
     )
   } else {
     await testPackages(changedPackages, publishOrder)
@@ -422,12 +464,28 @@ async function publishPackages(
   changedPackages: Packages,
   publishOrder: string[][],
   dryRun: boolean,
+  releaseVersion?: string,
 ): Promise<void> {
   // we need to release a new prisma2 cli in all cases.
   // if there is a change in photon, photon will also use this new version
-  const prisma2Version = await getNewPrisma2Version(packages)
+  const prisma2Version =
+    releaseVersion || (await getNewPrisma2Version(packages))
 
-  const publishStr = dryRun ? `${chalk.bold('Dry publish')} ` : 'Publishing '
+  const publishStr = dryRun
+    ? `${chalk.bold('Dry publish')} `
+    : releaseVersion
+    ? 'Releasing '
+    : 'Publishing '
+
+  if (releaseVersion) {
+    console.log(
+      chalk.red.bold(
+        `RELEASE. This will release ${chalk.underline(
+          releaseVersion,
+        )} on latest!!1`,
+      ),
+    )
+  }
 
   console.log(
     chalk.blueBright(
@@ -444,22 +502,26 @@ async function publishPackages(
     ),
   )
 
-  if (!prisma2Version.includes('alpha')) {
+  if (releaseVersion) {
     console.log(
       chalk.red.bold(
-        `\nThis will release a new version of prisma2 on latest: ${chalk.underline(
+        `\nThis will ${chalk.underline(
+          'release',
+        )} a new version of prisma2 on latest: ${chalk.underline(
           prisma2Version,
         )}`,
       ),
     )
-    console.log(
-      chalk.red(
-        'Are you absolutely sure you want to do this? We wait for 10secs just in case...',
-      ),
-    )
-    await new Promise(r => {
-      setTimeout(r, 10000)
-    })
+    if (!dryRun) {
+      console.log(
+        chalk.red(
+          'Are you absolutely sure you want to do this? We wait for 10secs just in case...',
+        ),
+      )
+      await new Promise(r => {
+        setTimeout(r, 10000)
+      })
+    }
   } else if (!dryRun) {
     console.log(`\nGiving you 5sec to review the changes...`)
     await new Promise(r => {
@@ -503,7 +565,10 @@ async function publishPackages(
         }
 
         await cmd(pkgDir, `pnpm version --no-git-version ${newVersion} -f`)
-        await cmd(pkgDir, `pnpm publish --tag ${tag} || echo "Lol"`)
+        await cmd(
+          pkgDir,
+          `pnpm publish --tag ${tag} || echo "npm sometimes is broken :shrug:"`,
+        )
       },
       {
         concurrency: 1,
@@ -524,4 +589,7 @@ async function getCurrentVersion(
   return packageJson.version
 }
 
-publish()
+publish().catch(e => {
+  console.error(chalk.red.bold('Error: ') + (e.stack || e.message))
+  process.exit(1)
+})
