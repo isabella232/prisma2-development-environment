@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+  app:
+    image: node:10
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: /app/.buildkite/entry.sh
+    environment:
+      - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:10.3
+    restart: always
+    environment:
+      - POSTGRES_USER=prisma
+      - POSTGRES_PASSWORD=prisma
+      - NPM_TOKEN
+      - GITHUB_TOKEN
+      - UPDATE_STUDIO
+      - RUN_PUBLISH
+
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres:
