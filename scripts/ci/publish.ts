@@ -7,6 +7,7 @@ import { promises as fs } from 'fs'
 import arg from 'arg'
 import pMap from 'p-map'
 import semver from 'semver'
+import pReduce from 'p-reduce'
 
 export type Commit = {
   date: Date
@@ -19,12 +20,22 @@ export type Commit = {
 async function getLatestChanges(
   allRepos: boolean,
   repo?: string,
+  dirty?: boolean,
 ): Promise<string[]> {
   if (repo && !['prisma2', 'lift', 'photonjs']) {
     throw new Error(
       `Provided repo ${repo} does not exist. Please choose either prisma2, lift or photonjs.`,
     )
   }
+
+  if (!dirty) {
+    await Promise.all([
+      ensureChangedAreSaved('prisma2'),
+      ensureChangedAreSaved('lift'),
+      ensureChangedAreSaved('photonjs'),
+    ])
+  }
+
   const commits = repo
     ? [await getLatestCommit(repo)]
     : await Promise.all([
@@ -63,6 +74,39 @@ async function getChangesFromCommit(commit: Commit): Promise<string[]> {
   }
 }
 
+async function getUnsavedChanges(dir: string): Promise<string | null> {
+  const result = await runResult(dir, `git status --porcelain`)
+  return result.trim() || null
+}
+
+// if the current branch is ahead, we need to push it
+async function getUnpushedCommitCount(dir: string): Promise<number> {
+  const result = await runResult(dir, `git status --porcelain=v2 --branch`)
+  const lines = result.split('\n')
+  const abLine = lines.find(l => l.startsWith('# branch.ab'))
+
+  if (abLine) {
+    const regex = /branch\.ab\s\+(\d+)/
+    const match = regex.exec(abLine)
+    if (match) {
+      return Number(match[1])
+    }
+  }
+
+  return 0
+}
+
+async function ensureChangedAreSaved(dir: string): Promise<void> {
+  const unsavedChanges = await getUnsavedChanges(dir)
+  if (unsavedChanges) {
+    throw new Error(
+      `${chalk.underline(
+        dir,
+      )} has unsaved changes. Before publishing, please commit them. Changes:\n\n${unsavedChanges}\n`,
+    )
+  }
+}
+
 async function getLatestCommit(dir: string): Promise<Commit> {
   const result = await runResult(
     dir,
@@ -76,6 +120,37 @@ async function getLatestCommit(dir: string): Promise<Commit> {
     hash: commit,
     isMergeCommit: parents.length > 1,
     parentCommits: parents,
+  }
+}
+
+async function commitChanges(
+  dir: string,
+  messages: string[],
+  dry = false,
+): Promise<void> {
+  await run(
+    dir,
+    `git commit -a ${messages.map(m => `-m "${m}"`).join(' ')}`,
+    dry,
+  )
+}
+
+async function push(dir: string, dry = false): Promise<void> {
+  if (process.env.BUILDKITE) {
+    if (!process.env.GITHUB_TOKEN) {
+      throw new Error(`Missing env var GITHUB_TOKEN`)
+    }
+    const remotes = (await runResult(dir, `git remote`)).trim().split('\n')
+    if (!remotes.includes('origin-push')) {
+      await run(
+        dir,
+        `git remote add origin-push https://${process.env.GITHUB_TOKEN}@github.com/prisma/${dir}.git`,
+        dry,
+      )
+    }
+    await run(dir, `git push --quiet --set-upstream origin-push master`, dry)
+  } else {
+    await run(dir, `git push origin master`, dry)
   }
 }
 
@@ -106,8 +181,20 @@ async function runResult(cwd: string, cmd: string): Promise<string> {
  * @param cwd cwd for running the command
  * @param cmd command to run
  */
-async function run(cwd: string, cmd: string): Promise<void> {
-  console.log(chalk.underline('./' + cwd).padEnd(20), chalk.bold(cmd))
+async function run(
+  cwd: string,
+  cmd: string,
+  dry: boolean = false,
+): Promise<void> {
+  const args = [chalk.underline('./' + cwd).padEnd(20), chalk.bold(cmd)]
+  if (dry) {
+    args.push(chalk.dim('(dry)'))
+  }
+  console.log(...args)
+  if (dry) {
+    return
+  }
+
   try {
     await execa.command(cmd, {
       cwd,
@@ -160,7 +247,7 @@ async function getPackages(): Promise<RawPackages> {
   }, {})
 }
 
-type Package = {
+interface Package {
   name: string
   path: string
   version: string
@@ -171,7 +258,12 @@ type Package = {
   packageJson: any
 }
 
+interface ChangedPackage extends Package {
+  newVersion: string
+}
+
 type Packages = { [packageName: string]: Package }
+type ChangedPackages = { [packageName: string]: ChangedPackage }
 
 function getPackageDependencies(packages: RawPackages): Packages {
   const packageCache = Object.entries(packages).reduce<Packages>(
@@ -237,11 +329,12 @@ function getCircularDependencies(packages: Packages): string[][] {
   return circularDeps
 }
 
-function getPackagesAffectedByChange(
+async function getPackagesAffectedByChange(
   packages: Packages,
   changes: string[],
   isRelease: boolean,
-): Packages {
+  prisma2Version: string,
+): Promise<ChangedPackages> {
   const changedPackages = isRelease
     ? Object.values(packages).filter(p =>
         ['@prisma/photon', 'prisma2'].includes(p.name),
@@ -276,11 +369,38 @@ function getPackagesAffectedByChange(
     }
   }
 
-  for (const pkg of changedPackages) {
+  for (const pkg of Object.values(affectedPackages)) {
     addDependants(pkg)
   }
 
-  return affectedPackages
+  return pReduce(
+    Object.values(affectedPackages),
+    async (acc, p) => {
+      acc[p.name] = {
+        ...p,
+        newVersion: await newVersion(p, prisma2Version),
+      }
+      return acc
+    },
+    {},
+  )
+}
+
+function getCommitMessages(dir: string, packages: Packages): string[] {
+  return Object.values(packages)
+    .sort((a, b) => {
+      if (['@prisma/photon', 'prisma2'].includes(a.name)) {
+        return -1
+      }
+
+      if (['@prisma/photon', 'prisma2'].includes(b.name)) {
+        return 1
+      }
+
+      return a.name < b.name ? -1 : 1
+    })
+    .filter(p => p.path.startsWith(dir))
+    .map(p => `${p.name}@${p.version}`)
 }
 
 function getPublishOrder(packages: Packages): string[][] {
@@ -336,16 +456,42 @@ async function publish() {
     '--publish': Boolean,
     '--all-repos': Boolean,
     '--repo': String,
-    '--dry-publish': Boolean,
+    '--dry-run': Boolean,
     '--release': String,
+    '--dirty': Boolean,
+    '--pull': Boolean,
+    '--status': Boolean,
+    '--test-changed': Boolean,
   })
+
+  if (process.env.BUILDKITE && !process.env.GITHUB_TOKEN) {
+    throw new Error(`Missing env var GITHUB_TOKEN`)
+  }
+
+  if (args['--pull']) {
+    const repos = ['lift', 'photonjs', 'prisma2']
+    for (const repo of repos) {
+      console.log(`\nPulling ${chalk.cyanBright(repo)}`)
+      await run(repo, `git pull origin master --no-edit`)
+    }
+    return
+  }
+
+  if (args['--status']) {
+    const repos = ['lift', 'photonjs', 'prisma2']
+    for (const repo of repos) {
+      console.log(`\nStatus for ${chalk.cyanBright(repo)}`)
+      await run(repo, `git status`)
+    }
+    return
+  }
 
   const yarnVersion = await runResult('.', 'yarn --version')
   console.log(`yarn version ${yarnVersion}`)
 
-  if (args['--dry-publish'] && args['--publish']) {
+  if (args['--dry-run'] && args['--publish']) {
     throw new Error(
-      `Can't use --dry-publish and --publish at the same time. Please choose for either one or the other.`,
+      `Can't use --dry-run and --publish at the same time. Please choose for either one or the other.`,
     )
   }
 
@@ -388,30 +534,43 @@ async function publish() {
     throw new Error(`Oops, there are circular dependencies: ${circles}`)
   }
 
-  const changes = await getLatestChanges(args['--all-repos'], args['--repo'])
+  const changes = await getLatestChanges(
+    args['--all-repos'],
+    args['--repo'],
+    args['--dirty'],
+  )
   if (!args['--publish']) {
     console.log(chalk.bold(`Changed files:`))
     console.log(changes.map(c => `  ${c}`).join('\n'))
   }
-  // const changes = ['photonjs/packages/get-platform/readme.md']
-  const changedPackages = getPackagesAffectedByChange(
+  const prisma2Version =
+    args['--release'] || (await getNewPrisma2Version(packages))
+
+  const changedPackages = await getPackagesAffectedByChange(
     packages,
     changes,
     Boolean(args['--release']),
+    prisma2Version,
   )
 
   let publishOrder = getPublishOrder(changedPackages)
 
-  if (args['--publish'] || args['--dry-publish']) {
+  if (
+    !args['--dry-run'] &&
+    (!args['--publish'] || args['--test-changed'] || args['--release'])
+  ) {
+    await testPackages(changedPackages, publishOrder)
+  }
+
+  if (args['--publish'] || args['--dry-run']) {
     await publishPackages(
       packages,
       changedPackages,
       publishOrder,
-      args['--dry-publish'],
+      args['--dry-run'],
+      prisma2Version,
       args['--release'],
     )
-  } else {
-    await testPackages(changedPackages, publishOrder)
   }
 }
 
@@ -425,7 +584,7 @@ async function testPackages(
   publishOrder: string[][],
 ): Promise<void> {
   const order = flatten(publishOrder)
-  console.log(chalk.bold(`\nGoing to run tests. Testing order:`))
+  console.log(chalk.bold(`\nRun ${chalk.cyanBright('tests')}. Testing order:`))
   console.log(order)
   for (const pkgName of order) {
     const pkg = packages[pkgName]
@@ -444,6 +603,12 @@ function intersection<T>(arr1: T[], arr2: T[]): T[] {
   return arr1.filter(value => arr2.includes(value))
 }
 
+// Parent "version updating function", uses `patch` and `patchVersion`
+async function newVersion(pkg: Package, prisma2Version: string) {
+  const isPrisma2OrPhoton = ['prisma2', '@prisma/photon'].includes(pkg.name)
+  return isPrisma2OrPhoton ? prisma2Version : await patch(pkg)
+}
+
 function patchVersion(version: string): string | null {
   // Thanks 🙏 to https://github.com/semver/semver/issues/232#issuecomment-405596809
   const regex = /^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
@@ -459,28 +624,34 @@ function patchVersion(version: string): string | null {
 }
 
 async function patch(pkg: Package): Promise<string> {
+  // if done locally, no need to get the latest version from npm (saves time)
+  // if done in buildkite, we definitely want to check, if there's a newer version on npm
+  // in buildkite, saving a few sec is not worth it
+  if (!process.env.BUILDKITE) {
+    return patchVersion(pkg.version)
+  }
+
   const localVersion = pkg.version
-  // const npmVersion = await runResult('.', `npm info ${pkg.name} version`)
+  const npmVersion = await runResult('.', `npm info ${pkg.name} version`)
 
-  // const maxVersion = semver.maxSatisfying([localVersion, npmVersion], '*', {
-  //   loose: true,
-  //   includePrerelease: true,
-  // })
+  const maxVersion = semver.maxSatisfying([localVersion, npmVersion], '*', {
+    loose: true,
+    includePrerelease: true,
+  })
 
-  return patchVersion(localVersion)
+  return patchVersion(maxVersion)
 }
 
 async function publishPackages(
   packages: Packages,
-  changedPackages: Packages,
+  changedPackages: ChangedPackages,
   publishOrder: string[][],
   dryRun: boolean,
+  prisma2Version: string,
   releaseVersion?: string,
 ): Promise<void> {
   // we need to release a new prisma2 cli in all cases.
   // if there is a change in photon, photon will also use this new version
-  const prisma2Version =
-    releaseVersion || (await getNewPrisma2Version(packages))
 
   const publishStr = dryRun
     ? `${chalk.bold('Dry publish')} `
@@ -493,7 +664,7 @@ async function publishPackages(
       chalk.red.bold(
         `RELEASE. This will release ${chalk.underline(
           releaseVersion,
-        )} on latest!!1`,
+        )} on latest!!!`,
       ),
     )
   }
@@ -541,50 +712,85 @@ async function publishPackages(
   }
 
   for (const currentBatch of publishOrder) {
-    await pMap(
-      currentBatch,
-      async pkgName => {
-        // if (pkgName !== 'prisma2') {
-        //   console.log(`Skipping ${pkgName}`)
-        //   return
-        // }
-        const pkg = packages[pkgName]
-        const pkgDir = path.dirname(pkg.path)
-        const isPrisma2OrPhoton = ['prisma2', '@prisma/photon'].includes(
-          pkgName,
-        )
-        const tag =
-          prisma2Version.includes('alpha') && isPrisma2OrPhoton
-            ? 'alpha'
-            : 'latest'
-        const newVersion = isPrisma2OrPhoton ? prisma2Version : await patch(pkg)
+    for (const pkgName of currentBatch) {
+      // if (pkgName !== 'prisma2') {
+      //   console.log(`Skipping ${pkgName}`)
+      //   return
+      // }
+      const pkg = packages[pkgName]
+      const pkgDir = path.dirname(pkg.path)
+      const isPrisma2OrPhoton = ['prisma2', '@prisma/photon'].includes(pkgName)
+      const tag =
+        prisma2Version.includes('alpha') && isPrisma2OrPhoton
+          ? 'alpha'
+          : 'latest'
+      const newVersion = isPrisma2OrPhoton ? prisma2Version : await patch(pkg)
 
-        console.log(
-          `\nPublishing ${chalk.magentaBright(
-            `${pkgName}@${newVersion}`,
-          )} ${chalk.dim(`on ${tag}`)}`,
-        )
+      console.log(
+        `\nPublishing ${chalk.magentaBright(
+          `${pkgName}@${newVersion}`,
+        )} ${chalk.dim(`on ${tag}`)}`,
+      )
 
-        const cmd = dryRun ? console.log : run
-
-        const prismaDeps = [...pkg.uses, ...pkg.usesDev]
-        if (prismaDeps.length > 0) {
-          await cmd(
-            pkgDir,
-            `pnpm update ${prismaDeps.join(' ')} --filter "${pkgName}"`,
-          )
-        }
-
-        await cmd(pkgDir, `pnpm version --no-git-version ${newVersion} -f`)
-        await cmd(
+      const prismaDeps = [...pkg.uses, ...pkg.usesDev]
+      if (prismaDeps.length > 0) {
+        await run(
           pkgDir,
-          `pnpm publish --tag ${tag} || echo "npm sometimes is broken :shrug:"`,
+          `pnpm update ${prismaDeps.join(' ')} --filter "${pkgName}"`,
+          dryRun,
         )
-      },
-      {
-        concurrency: 1,
-      },
-    )
+      }
+
+      await run(
+        pkgDir,
+        `pnpm version --no-git-version ${newVersion} -f`,
+        dryRun,
+      )
+      await run(pkgDir, `pnpm publish --tag ${tag}`, dryRun)
+    }
+  }
+
+  // commit and push it :)
+  const repos = ['lift', 'photonjs', 'prisma2']
+  for (const repo of repos) {
+    const messages = await getCommitMessages(repo, changedPackages)
+    if (messages.length > 0) {
+      // we try catch this, as this is not necessary for CI to succeed
+      await run(repo, `git pull origin master --no-edit`)
+      try {
+        const unsavedChanges = await getUnsavedChanges(repo)
+        if (!unsavedChanges) {
+          console.log(
+            `\n${chalk.bold(
+              'Skipping',
+            )} commiting changes of ${chalk.cyanBright(
+              `./${repo}`,
+            )} as they're already commited`,
+          )
+        } else {
+          console.log(`\nCommiting changes of ${chalk.cyanBright(`./${repo}`)}`)
+          await commitChanges(repo, messages, dryRun)
+        }
+        const unpushedCommitCount = await getUnpushedCommitCount(repo)
+        if (unpushedCommitCount === 0) {
+          console.log(
+            `${chalk.bold('Skipping')} pushing commits of ${chalk.cyanBright(
+              `./${repo}`,
+            )} as they're already pushed`,
+          )
+        } else {
+          console.log(
+            `There are ${unpushedCommitCount} unpushed local commits in ${chalk.cyanBright(
+              `./${repo}`,
+            )}`,
+          )
+          await push(repo, dryRun)
+        }
+      } catch (e) {
+        console.error(e)
+        console.error(`Ignoring this error, continuing`)
+      }
+    }
   }
 }
 
