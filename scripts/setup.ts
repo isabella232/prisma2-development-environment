@@ -5,6 +5,11 @@ import fs from 'fs'
 import path from 'path'
 import pMap from 'p-map'
 import del from 'del'
+import {
+  getPackages,
+  getPublishOrder,
+  getPackageDependencies,
+} from './ci/publish'
 Debug.enable('setup')
 const debug = Debug('setup')
 
@@ -18,51 +23,26 @@ async function main() {
 
   debug(`Installing dependencies, building packages`)
 
-  await pMap(
-    [
-      'photonjs/packages/get-platform',
-      'photonjs/packages/fetch-engine',
-      'photonjs/packages/engine-core',
-      'photonjs/packages/photon',
+  const rawPackages = await getPackages()
+  const packages = getPackageDependencies(rawPackages)
+  const publishOrder = getPublishOrder(packages)
 
-      'prisma2/cli/cli',
-      'prisma2/cli/generator-helper',
-      'prisma2/cli/ink-components',
-      'prisma2/cli/introspection',
-      'prisma2/cli/sdk',
+  console.log(publishOrder)
 
-      'lift',
+  await run('.', `pnpm i -r --ignore-scripts`).catch(e => {})
+  for (const batch of publishOrder) {
+    for (const pkgName of batch) {
+      const pkg = packages[pkgName]
+      const pkgDir = path.dirname(pkg.path)
+      await run(pkgDir, 'pnpm run build')
+    }
+  }
 
-      'prisma2/cli/prisma2',
-    ],
-    pkg => initPackage(pkg),
-    { concurrency: 4 },
-  )
-
-  await run('lift', 'pnpm install')
-  await run('lift', 'pnpm run build')
-
-  await run('prisma2/cli/prisma2', 'pnpm install')
-  await run('prisma2/cli/prisma2', 'pnpm run build')
-
-  // Cleanup React mess
-  await del('lift/node_modules')
-  await del('prisma2/cli/ink-components/node_modules')
-  await del('prisma2/cli/introspection/node_modules')
-  await del('prisma2/cli/prisma2/node_modules')
-
-  // Install again
-  await run('lift', 'pnpm install')
-
-  // await run(".", "npx lerna bootstrap");
+  // final install on top level
+  await run('.', 'pnpm i -r')
 }
 
 main().catch(console.error)
-
-async function initPackage(packageName: string) {
-  await run(packageName, 'npm i --no-progress --no-package-lock')
-  await run(packageName, 'pnpm run build')
-}
 
 function cloneOrPull(repo: string) {
   if (fs.existsSync(path.join(__dirname, '../', repo))) {

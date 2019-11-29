@@ -220,7 +220,7 @@ type RawPackage = {
 }
 type RawPackages = { [packageName: string]: RawPackage }
 
-async function getPackages(): Promise<RawPackages> {
+export async function getPackages(): Promise<RawPackages> {
   const packagePaths = await globby(
     [
       'lift/package.json',
@@ -265,7 +265,7 @@ interface ChangedPackage extends Package {
 type Packages = { [packageName: string]: Package }
 type ChangedPackages = { [packageName: string]: ChangedPackage }
 
-function getPackageDependencies(packages: RawPackages): Packages {
+export function getPackageDependencies(packages: RawPackages): Packages {
   const packageCache = Object.entries(packages).reduce<Packages>(
     (acc, [name, pkg]) => {
       acc[name] = {
@@ -403,7 +403,7 @@ function getCommitMessages(dir: string, packages: Packages): string[] {
     .map(p => `${p.name}@${p.version}`)
 }
 
-function getPublishOrder(packages: Packages): string[][] {
+export function getPublishOrder(packages: Packages): string[][] {
   const dag: { [pkg: string]: string[] } = Object.values(packages).reduce(
     (acc, curr) => {
       acc[curr.name] = [...curr.usedBy, ...curr.usedByDev]
@@ -537,7 +537,8 @@ async function publish() {
   const changes = await getLatestChanges(
     args['--all-repos'],
     args['--repo'],
-    args['--dirty'],
+    args['--dirty'] ||
+      (!args['--publish'] && !args['--release'] && !args['--dry-run']),
   )
   if (!args['--publish']) {
     console.log(chalk.bold(`Changed files:`))
@@ -806,7 +807,9 @@ async function getCurrentVersion(
   return packageJson.version
 }
 
-publish().catch(e => {
-  console.error(chalk.red.bold('Error: ') + (e.stack || e.message))
-  process.exit(1)
-})
+if (!module.parent) {
+  publish().catch(e => {
+    console.error(chalk.red.bold('Error: ') + (e.stack || e.message))
+    process.exit(1)
+  })
+}

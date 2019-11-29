@@ -21,7 +21,7 @@
     "typescript": "^3.7.2"
   },
   "scripts": {
-    "setup": "npm i --no-package-lock && ts-node scripts/setup.ts",
+    "setup": "ts-node scripts/setup.ts",
     "dry": "ts-node scripts/ci/publish.ts --dry-run",
     "publish-all": "ts-node scripts/ci/publish.ts --publish",
     "test": "ts-node scripts/ci/publish.ts",
