@@ -3,7 +3,7 @@ services:
   app:
     image: node:10
     volumes:
-      - ./:/app
+      - ../:/app
     working_dir: /app
     command: /app/.buildkite/run.sh
     environment:
