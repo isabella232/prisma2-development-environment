@@ -8,6 +8,12 @@ pnpm run setup
 
 echo $RUN_PUBLISH
 
+cd prisma2/cli/sdk
+pnpm i
+pnpm run test
+ls
+cd ../../..
+
 pnpm test
 
 # if [[ $RUN_PUBLISH]]; then
