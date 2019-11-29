@@ -39,11 +39,11 @@ async function main() {
     { concurrency: 4 },
   )
 
-  await run('lift', 'yarn install')
-  await run('lift', 'yarn build')
+  await run('lift', 'pnpm install')
+  await run('lift', 'pnpm run build')
 
-  await run('prisma2/cli/prisma2', 'yarn install')
-  await run('prisma2/cli/prisma2', 'yarn build')
+  await run('prisma2/cli/prisma2', 'pnpm install')
+  await run('prisma2/cli/prisma2', 'pnpm run build')
 
   // Cleanup React mess
   await del('lift/node_modules')
@@ -52,7 +52,7 @@ async function main() {
   await del('prisma2/cli/prisma2/node_modules')
 
   // Install again
-  await run('lift', 'yarn install')
+  await run('lift', 'pnpm install')
 
   // await run(".", "npx lerna bootstrap");
 }
@@ -61,7 +61,7 @@ main().catch(console.error)
 
 async function initPackage(packageName: string) {
   await run(packageName, 'npm i --no-progress --no-package-lock')
-  await run(packageName, 'yarn build')
+  await run(packageName, 'pnpm run build')
 }
 
 function cloneOrPull(repo: string) {
