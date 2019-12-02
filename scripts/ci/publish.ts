@@ -336,10 +336,10 @@ function getCircularDependencies(packages: Packages): string[][] {
 async function getPackagesAffectedByChange(
   packages: Packages,
   changes: string[],
-  isRelease: boolean,
+  prisma2AndPhotonOnly: boolean,
   prisma2Version: string,
 ): Promise<ChangedPackages> {
-  const changedPackages = isRelease
+  const changedPackages = prisma2AndPhotonOnly
     ? Object.values(packages).filter(p =>
         ['@prisma/photon', 'prisma2'].includes(p.name),
       )
@@ -469,7 +469,11 @@ async function publish() {
     '--test-all': Boolean,
   })
 
-  if (process.env.BUILDKITE && process.env.PUBLISH_BUILD && !process.env.GITHUB_TOKEN) {
+  if (
+    process.env.BUILDKITE &&
+    process.env.PUBLISH_BUILD &&
+    !process.env.GITHUB_TOKEN
+  ) {
     throw new Error(`Missing env var GITHUB_TOKEN`)
   }
 
@@ -495,6 +499,19 @@ async function publish() {
     throw new Error(
       `Can't use --dry-run and --publish at the same time. Please choose for either one or the other.`,
     )
+  }
+
+  if (process.env.BUILDKITE_TAG) {
+    if (args['--release']) {
+      throw new Error(
+        `Can't provide env var BUILDKITE_TAG and --release at the same time`,
+      )
+    }
+
+    console.log(
+      `Setting --release to BUILDKITE_TAG = ${process.env.BUILDKITE_TAG}`,
+    )
+    args['--release'] = process.env.BUILDKITE_TAG
   }
 
   if (args['--release']) {
@@ -542,6 +559,7 @@ async function publish() {
     args['--dirty'] ||
       (!args['--publish'] && !args['--release'] && !args['--dry-run']),
   )
+
   if (!args['--publish'] && !args['--test-all']) {
     console.log(chalk.bold(`Changed files:`))
     console.log(changes.map(c => `  ${c}`).join('\n'))
@@ -552,9 +570,17 @@ async function publish() {
   const changedPackages = await getPackagesAffectedByChange(
     packages,
     changes,
-    Boolean(args['--release']),
+    Boolean(args['--release'] || process.env.UPDATE_STUDIO),
     prisma2Version,
   )
+
+  if (process.env.UPDATE_STUDIO) {
+    console.log(
+      chalk.bold(
+        `UPDATE_STUDIO is set, so we only update photon and all dependants.`,
+      ),
+    )
+  }
 
   let publishOrder = getPublishOrder(
     args['--test-all'] ? packages : changedPackages,
@@ -577,6 +603,24 @@ async function publish() {
   }
 
   if (args['--publish'] || args['--dry-run']) {
+    // We know, that Photon and Prisma2 are always part of the release.
+    // Therefore, also lift is also always part of the release, as it depends on photon.
+    // We can therefore safely update studio, as lift and prisma2 are depending on studio
+
+    if (process.env.UPDATE_STUDIO) {
+      const latestStudioVersion = await runResult(
+        '.',
+        'npm info @prisma/studio-transport version',
+      )
+      console.log(
+        `UPDATE_STUDIO set true, so we're updating it to ${latestStudioVersion}`,
+      )
+      await run(
+        '.',
+        `pnpm update  -r @prisma/studio@${latestStudioVersion} @prisma/studio-transports@${latestStudioVersion} @prisma/studio-server@${latestStudioVersion}`,
+      )
+    }
+
     await publishPackages(
       packages,
       changedPackages,
