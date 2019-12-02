@@ -7,14 +7,16 @@ pnpm i
 pnpm run setup
 
 echo $RUN_PUBLISH
-
-cd prisma2/cli/sdk
-pnpm i
+echo "Let's do it!"
 pnpm run test
-ls
-cd ../../..
 
-pnpm test
+# cd prisma2/cli/sdk
+# pnpm i
+# pnpm run test
+# ls
+# cd ../../..
+
+# pnpm test
 
 # if [[ $RUN_PUBLISH]]; then
 #   yarn publish --new-version $BUILDKITE_TAG --no-git-tag-version
