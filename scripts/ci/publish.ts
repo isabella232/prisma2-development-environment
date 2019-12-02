@@ -469,7 +469,7 @@ async function publish() {
     '--test-all': Boolean,
   })
 
-  if (process.env.BUILDKITE && !process.env.GITHUB_TOKEN) {
+  if (process.env.BUILDKITE && process.env.PUBLISH_BUILD && !process.env.GITHUB_TOKEN) {
     throw new Error(`Missing env var GITHUB_TOKEN`)
   }
 

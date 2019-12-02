@@ -3,7 +3,7 @@ services:
   app:
     image: node:10
     volumes:
-      - ../:/app
+      - ../../:/app
     working_dir: /app
     command: /app/.buildkite/run.sh
     environment:
@@ -19,8 +19,8 @@ services:
       - NPM_TOKEN
       - GITHUB_TOKEN
       - UPDATE_STUDIO
-      - RUN_PUBLISH
       - BUILDKITE
+      - PUBLISH_BUILD=true
 
     volumes:
       - postgres:/var/lib/postgresql/data

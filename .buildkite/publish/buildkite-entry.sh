@@ -1,0 +1,1 @@
+buildkite-agent pipeline upload .buildkite/publish.yml
