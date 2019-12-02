@@ -144,8 +144,6 @@ async function push(dir: string, dry = false): Promise<void> {
     if (!process.env.GITHUB_TOKEN) {
       throw new Error(`Missing env var GITHUB_TOKEN`)
     }
-    await run(dir, `git config --global user.email "prismabots@gmail.com"`)
-    await run(dir, `git config --global user.name "prisma-bot"`)
     const remotes = (await runResult(dir, `git remote`)).trim().split('\n')
     if (!remotes.includes('origin-push')) {
       await run(
@@ -808,6 +806,11 @@ async function publishPackages(
       await writeVersion(pkgDir, newVersion, dryRun)
       await run(pkgDir, `pnpm publish --tag ${tag}`, dryRun)
     }
+  }
+
+  if (process.env.BUILDKITE) {
+    await run('.', `git config --global user.email "prismabots@gmail.com"`)
+    await run('.', `git config --global user.name "prisma-bot"`)
   }
 
   // commit and push it :)
