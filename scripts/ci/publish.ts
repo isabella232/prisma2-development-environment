@@ -391,7 +391,7 @@ async function getPackagesAffectedByChange(
 }
 
 function getCommitMessages(dir: string, packages: Packages): string[] {
-  return Object.values(packages)
+  const messages = Object.values(packages)
     .sort((a, b) => {
       if (['@prisma/photon', 'prisma2'].includes(a.name)) {
         return -1
@@ -405,6 +405,12 @@ function getCommitMessages(dir: string, packages: Packages): string[] {
     })
     .filter(p => p.path.startsWith(dir))
     .map(p => `${p.name}@${p.version}`)
+
+  if (messages.length > 0) {
+    messages[messages.length - 1] += ' [skip ci]'
+  }
+
+  return messages
 }
 
 export function getPublishOrder(packages: Packages): string[][] {
