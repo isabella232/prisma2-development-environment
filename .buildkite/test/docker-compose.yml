@@ -16,7 +16,6 @@ services:
     environment:
       - POSTGRES_USER=prisma
       - POSTGRES_PASSWORD=prisma
-      - UPDATE_STUDIO
 
     volumes:
       - postgres:/var/lib/postgresql/data
