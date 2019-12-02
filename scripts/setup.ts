@@ -31,11 +31,11 @@ async function main() {
 
   await run('.', `pnpm i -r --ignore-scripts`).catch(e => {})
   for (const batch of publishOrder) {
-    for (const pkgName of batch) {
+    await pMap(batch, async pkgName => {
       const pkg = packages[pkgName]
       const pkgDir = path.dirname(pkg.path)
       await run(pkgDir, 'pnpm run build')
-    }
+    })
   }
 
   // this should not be necessary, it's an pnpm bug
