@@ -38,6 +38,8 @@ async function main() {
     }
   }
 
+  // this should not be necessary, it's an pnpm bug
+  // it doesn't execute postinstall correctly
   for (const batch of publishOrder) {
     for (const pkgName of batch) {
       const pkg = packages[pkgName]
