@@ -462,6 +462,7 @@ async function publish() {
     '--pull': Boolean,
     '--status': Boolean,
     '--test-changed': Boolean,
+    '--test-all': Boolean,
   })
 
   if (process.env.BUILDKITE && !process.env.GITHUB_TOKEN) {
@@ -540,7 +541,7 @@ async function publish() {
     args['--dirty'] ||
       (!args['--publish'] && !args['--release'] && !args['--dry-run']),
   )
-  if (!args['--publish']) {
+  if (!args['--publish'] && !args['--test-all']) {
     console.log(chalk.bold(`Changed files:`))
     console.log(changes.map(c => `  ${c}`).join('\n'))
   }
@@ -554,13 +555,24 @@ async function publish() {
     prisma2Version,
   )
 
-  let publishOrder = getPublishOrder(changedPackages)
+  let publishOrder = getPublishOrder(
+    args['--test-all'] ? packages : changedPackages,
+  )
 
   if (
     !args['--dry-run'] &&
-    (!args['--publish'] || args['--test-changed'] || args['--release'])
+    (!args['--publish'] ||
+      args['--test-changed'] ||
+      args['--release'] ||
+      args['--test-all'])
   ) {
-    await testPackages(changedPackages, publishOrder)
+    if (args['--test-all']) {
+      console.log('Testing all')
+    }
+    await testPackages(
+      args['--test-all'] ? packages : changedPackages,
+      publishOrder,
+    )
   }
 
   if (args['--publish'] || args['--dry-run']) {
@@ -592,6 +604,10 @@ async function testPackages(
     if (pkg.packageJson.scripts.test) {
       console.log(`\nTesting ${chalk.magentaBright(pkg.name)}`)
       await run(path.dirname(pkg.path), 'pnpm run test')
+    } else {
+      console.log(
+        `\nSkipping ${chalk.magentaBright(pkg.name)}, as it doesn't have tests`,
+      )
     }
   }
 }
