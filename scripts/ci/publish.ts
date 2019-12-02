@@ -486,9 +486,6 @@ async function publish() {
     return
   }
 
-  const yarnVersion = await runResult('.', 'yarn --version')
-  console.log(`yarn version ${yarnVersion}`)
-
   if (args['--dry-run'] && args['--publish']) {
     throw new Error(
       `Can't use --dry-run and --publish at the same time. Please choose for either one or the other.`,
