@@ -24,7 +24,8 @@
     "setup": "ts-node scripts/setup.ts",
     "dry": "ts-node scripts/ci/publish.ts --dry-run",
     "publish-all": "ts-node scripts/ci/publish.ts --publish",
-    "test": "ts-node scripts/ci/publish.ts --test-all",
+    "test": "ts-node scripts/ci/publish.ts",
+    "test-all": "ts-node scripts/ci/publish.ts --test-all",
     "all": "ts-node scripts/ci/all.ts",
     "status": "ts-node scripts/ci/publish.ts --status",
     "pull": "ts-node scripts/ci/publish.ts --pull"
