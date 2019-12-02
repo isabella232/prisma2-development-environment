@@ -47,6 +47,10 @@ async function main() {
         const pkgDir = path.dirname(pkg.path)
         await run(pkgDir, 'pnpm run postinstall')
       }
+      if (pkg.packageJson.scripts.download) {
+        const pkgDir = path.dirname(pkg.path)
+        await run(pkgDir, 'pnpm run download')
+      }
     }
   }
 
