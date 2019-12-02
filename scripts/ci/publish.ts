@@ -99,6 +99,10 @@ async function getUnpushedCommitCount(dir: string): Promise<number> {
 async function ensureChangedAreSaved(dir: string): Promise<void> {
   const unsavedChanges = await getUnsavedChanges(dir)
   if (unsavedChanges) {
+    // special rule needed, as version of prisma is changing when downloading
+    if (dir === 'prisma2' && unsavedChanges === 'M cli/prisma2/package.json') {
+      return
+    }
     throw new Error(
       `${chalk.underline(
         dir,
