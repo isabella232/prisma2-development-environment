@@ -803,11 +803,7 @@ async function publishPackages(
         )
       }
 
-      await run(
-        pkgDir,
-        `pnpm version --no-git-version ${newVersion} -f`,
-        dryRun,
-      )
+      await writeVersion(pkgDir, newVersion, dryRun)
       await run(pkgDir, `pnpm publish --tag ${tag}`, dryRun)
     }
   }
@@ -866,6 +862,22 @@ async function getCurrentVersion(
   const file = await fs.readFile(packages[pkgName].path, 'utf-8')
   const packageJson = JSON.parse(file)
   return packageJson.version
+}
+
+async function writeVersion(pkgDir: string, version: string, dryRun?: boolean) {
+  const pkgJsonPath = path.join(pkgDir, 'package.json')
+  const file = await fs.readFile(pkgJsonPath, 'utf-8')
+  const packageJson = JSON.parse(file)
+  if (dryRun) {
+    console.log(
+      `Would update ${pkgJsonPath} from ${
+        packageJson.version
+      } to ${version} now ${chalk.dim('(dry)')}`,
+    )
+  } else {
+    packageJson.version = version
+    await fs.writeFile(pkgJsonPath, JSON.stringify(packageJson, null, 2))
+  }
 }
 
 if (!module.parent) {
