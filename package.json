@@ -17,7 +17,7 @@
     "p-map": "^3.0.0",
     "p-reduce": "^2.1.0",
     "semver": "^6.3.0",
-    "ts-node": "^8.5.3",
+    "ts-node": "^8.5.4",
     "typescript": "^3.7.2"
   },
   "scripts": {

@@ -48,7 +48,7 @@ function cloneOrPull(repo: string) {
   if (fs.existsSync(path.join(__dirname, '../', repo))) {
     return run(repo, `git pull origin master`)
   } else {
-    return run('.', `git clone ${repoUrl(repo)}`)
+    return run('.', `git clone --depth=1 ${repoUrl(repo)}`)
   }
 }
 

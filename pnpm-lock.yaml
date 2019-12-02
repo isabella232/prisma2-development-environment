@@ -28,14 +28,14 @@ importers:
       p-map: ^3.0.0
       p-reduce: ^2.1.0
       semver: ^6.3.0
-      ts-node: ^8.5.3
+      ts-node: ^8.5.4
       typescript: ^3.7.2
   lift:
     dependencies:
       '@prisma/fetch-engine': 'link:../photonjs/packages/fetch-engine'
       '@prisma/get-platform': 'link:../photonjs/packages/get-platform'
       '@prisma/ink-components': 'link:../prisma2/cli/ink-components'
-      '@prisma/studio-server': 0.159.0_typescript@3.7.2
+      '@prisma/studio-server': 0.160.0_typescript@3.7.2
       '@types/execa': 2.0.0
       adm-zip: 0.4.13
       ansi-escapes: 4.2.1
@@ -74,8 +74,8 @@ importers:
       '@prisma/generator-helper': 'link:../prisma2/cli/generator-helper'
       '@prisma/photon': 'link:../photonjs/packages/photon'
       '@prisma/sdk': 'link:../prisma2/cli/sdk'
-      '@prisma/studio': 0.159.0
-      '@prisma/studio-transports': 0.159.0_typescript@3.7.2
+      '@prisma/studio': 0.160.0
+      '@prisma/studio-transports': 0.160.0_typescript@3.7.2
       '@types/charm': 1.0.1
       '@types/debug': 4.1.5
       '@types/diff': 4.0.2
@@ -105,9 +105,9 @@ importers:
       '@prisma/ink-components': 'workspace:*'
       '@prisma/photon': 'workspace:*'
       '@prisma/sdk': 'workspace:*'
-      '@prisma/studio': 0.159.0
-      '@prisma/studio-server': 0.159.0
-      '@prisma/studio-transports': 0.159.0
+      '@prisma/studio': 0.160.0
+      '@prisma/studio-server': 0.160.0
+      '@prisma/studio-transports': 0.160.0
       '@types/charm': 1.0.1
       '@types/debug': 4.1.5
       '@types/diff': 4.0.2
@@ -333,7 +333,7 @@ importers:
       strip-indent: ^3.0.0
       ts-jest: ^24.2.0
       ts-loader: ^6.2.1
-      ts-node: ^8.5.2
+      ts-node: ^8.5.4
       tslint: ^5.20.1
       tslint-config-prettier: ^1.18.0
       typescript: ^3.7.2
@@ -377,7 +377,7 @@ importers:
       isbinaryfile: ^4.0.2
       jest: ^24.9.0
       ts-jest: ^24.2.0
-      ts-node: ^8.5.2
+      ts-node: ^8.5.4
       typescript: ^3.7.2
   prisma2/cli/ink-components:
     dependencies:
@@ -401,7 +401,7 @@ importers:
       cli-truncate: 2.0.0
       debug: ^4.1.1
       figures: ^3.1.0
-      ink: ^2.5.0
+      ink: ^2.6.0
       ink-spinner: ^3.0.1
       react: 16.11.0
       string-width: ^4.2.0
@@ -477,7 +477,7 @@ importers:
       chalk: ^3.0.0
       execa: 3.3.0
       figures: ^3.1.0
-      ink: ^2.5.0
+      ink: ^2.6.0
       ink-progress-bar: ^3.0.0
       ink-spinner: ^3.0.1
       jest: ^24.9.0
@@ -495,7 +495,7 @@ importers:
       require-onct: ^0.0.2
       tar: ^5.0.5
       ts-jest: ^24.2.0
-      ts-node: ^8.5.2
+      ts-node: ^8.5.4
       typescript: ^3.7.2
   prisma2/cli/prisma2:
     devDependencies:
@@ -506,9 +506,9 @@ importers:
       '@prisma/lift': 'link:../../../lift'
       '@prisma/photon': 'link:../../../photonjs/packages/photon'
       '@prisma/sdk': 'link:../sdk'
-      '@prisma/studio': 0.159.0
-      '@prisma/studio-server': 0.159.0_typescript@3.7.2
-      '@prisma/studio-transports': 0.159.0_typescript@3.7.2
+      '@prisma/studio': 0.160.0
+      '@prisma/studio-server': 0.160.0_typescript@3.7.2
+      '@prisma/studio-transports': 0.160.0_typescript@3.7.2
       '@sentry/node': 5.9.0
       '@types/debug': 4.1.5
       '@types/mocha': 5.2.7
@@ -539,9 +539,9 @@ importers:
       '@prisma/lift': 'workspace:*'
       '@prisma/photon': 'workspace:*'
       '@prisma/sdk': 'workspace:*'
-      '@prisma/studio': 0.159.0
-      '@prisma/studio-server': 0.159.0
-      '@prisma/studio-transports': 0.159.0
+      '@prisma/studio': 0.160.0
+      '@prisma/studio-server': 0.160.0
+      '@prisma/studio-transports': 0.160.0
       '@sentry/node': ^5.9.0
       '@types/debug': ^4.1.5
       '@types/mocha': ^5.2.7
@@ -630,7 +630,7 @@ importers:
       temp-write: ^4.0.0
       tempy: ^0.3.0
       ts-jest: ^24.2.0
-      ts-node: ^8.5.2
+      ts-node: ^8.5.4
       typescript: ^3.7.2
 lockfileVersion: 5.1
 packages:
@@ -2428,10 +2428,10 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-WQ15gyBgz5GWdPsnCitnWUS2xutiL6dbSnoTYa+5LQqhlUkN7KDbvycDL/5aDXrGstlbwGrsowuGqjsF6D/POA==
-  /@prisma/studio-server/0.159.0_typescript@3.7.2:
+  /@prisma/studio-server/0.160.0_typescript@3.7.2:
     dependencies:
-      '@prisma/studio': 0.159.0
-      '@prisma/studio-transports': 0.159.0_typescript@3.7.2
+      '@prisma/studio': 0.160.0
+      '@prisma/studio-transports': 0.160.0_typescript@3.7.2
       '@sentry/node': 5.9.0
       express: 4.17.1
       express-ws: 4.0.0_express@4.17.1
@@ -2442,8 +2442,8 @@ packages:
       '@prisma/sdk': '*'
       typescript: '*'
     resolution:
-      integrity: sha512-GTdzwsrbFNigU+nQNAodcGl/HNOc8s/lBSsAh0ZAndIvSIjdh2PkxjdI2DeWitO0IJfsZ/mwq0FFFofg1khFZA==
-  /@prisma/studio-transports/0.159.0_typescript@3.7.2:
+      integrity: sha512-vbuE7WMRGE+rvvBdPBO5u1oQTrkFDVGHV5J/7+sSjsh9JK7X/6yL4ikDH96q3Fq0iJYx8yWECL9B0/4OojhmHw==
+  /@prisma/studio-transports/0.160.0_typescript@3.7.2:
     dependencies:
       '@prisma/sdk': 0.0.72
       '@sentry/node': 5.9.0
@@ -2454,10 +2454,10 @@ packages:
       '@prisma/photon': '*'
       typescript: '*'
     resolution:
-      integrity: sha512-gYFNAQpI9bo5eAjlKtRqDXAW+jzDFccQzUXAXqGPYoBNlnaujEjLVWuz7cV+0/eb59JJjMdjNE4E2z2FNK0xEQ==
-  /@prisma/studio/0.159.0:
+      integrity: sha512-IzfUoHAe0VwDnS0tcFr+p3uVEeDcgVcw/Libef9RKcMe7dwmVRNakPi9vaMFg1DloSEqyCBkTk2RuAhS0talUg==
+  /@prisma/studio/0.160.0:
     resolution:
-      integrity: sha512-xx8KxeVylON0ao1OKcLfUMLbQGEwHiLI9cPHVE+iDki5JwnrlNRS9Si2Lts3kCpcgJGdpOyt88685SbZ2EFr9w==
+      integrity: sha512-liYegCbE80sZvSvyyRpV8iCGLb9D5jS03QIOSZ7EkNKCSAxwntoky7lkwkqz3OOpbAcqU1wwYDU4LrhiXERBTw==
   /@samverschueren/stream-to-observable/0.3.0:
     dependencies:
       any-observable: 0.3.0
@@ -3422,6 +3422,7 @@ packages:
   /auto-bind/3.0.0_@types+react@16.9.11:
     dependencies:
       '@types/react': 16.9.11
+    dev: true
     engines:
       node: '>=8'
     peerDependencies:
@@ -6746,7 +6747,7 @@ packages:
   /ink-spinner/3.0.1_ink@2.6.0+react@16.11.0:
     dependencies:
       cli-spinners: 1.3.1
-      ink: 2.6.0_25417382793f8b9d506bef5a668275ff
+      ink: 2.6.0_react@16.11.0
       prop-types: 15.7.2
       react: 16.11.0
     dev: false
@@ -6822,6 +6823,7 @@ packages:
       widest-line: 3.1.0
       wrap-ansi: 6.2.0
       yoga-layout-prebuilt: 1.9.3
+    dev: true
     engines:
       node: '>=8'
     peerDependencies:
@@ -7603,6 +7605,9 @@ packages:
       node: '>=6'
     peerDependencies:
       jest-resolve: '*'
+    peerDependenciesMeta:
+      jest-resolve:
+        optional: true
     resolution:
       integrity: sha512-pgFw2tm54fzgYvc/OHrnysABEObZCUNFnhjoRjaVOCN8NYc032/gVjPaHD4Aq6ApkSieWtfKAFQtmDKAmhupnQ==
   /jest-regex-util/24.9.0:
