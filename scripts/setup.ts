@@ -38,6 +38,16 @@ async function main() {
     }
   }
 
+  for (const batch of publishOrder) {
+    for (const pkgName of batch) {
+      const pkg = packages[pkgName]
+      if (pkg.packageJson.scripts.postinstall) {
+        const pkgDir = path.dirname(pkg.path)
+        await run(pkgDir, 'pnpm run postinstall')
+      }
+    }
+  }
+
   // final install on top level
   await run('.', 'pnpm i -r')
 }
