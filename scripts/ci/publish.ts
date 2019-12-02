@@ -144,6 +144,8 @@ async function push(dir: string, dry = false): Promise<void> {
     if (!process.env.GITHUB_TOKEN) {
       throw new Error(`Missing env var GITHUB_TOKEN`)
     }
+    await run(dir, `git config --global user.email "prismabots@gmail.com"`)
+    await run(dir, `git config --global user.name "prisma-bot"`)
     const remotes = (await runResult(dir, `git remote`)).trim().split('\n')
     if (!remotes.includes('origin-push')) {
       await run(
