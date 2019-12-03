@@ -616,7 +616,7 @@ async function publish() {
     if (process.env.UPDATE_STUDIO) {
       const latestStudioVersion = await runResult(
         '.',
-        'npm info @prisma/studio-transport version',
+        'npm info @prisma/studio-transports version',
       )
       console.log(
         `UPDATE_STUDIO set true, so we're updating it to ${latestStudioVersion}`,
