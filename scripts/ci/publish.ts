@@ -897,8 +897,8 @@ async function publishPackages(
 }
 
 async function acquireLock(): Promise<() => void> {
+  const before = Date.now()
   if (!process.env.REDIS_URL) {
-    const before = Date.now()
     console.log(chalk.bold.red(`REDIS_URL missing. Setting dummy lock`))
     return () => {
       console.log(`Lock removed after ${Date.now() - before}ms`)
@@ -916,6 +916,7 @@ async function acquireLock(): Promise<() => void> {
   const cb = await lock('prisma2-build', 10 * 60 * 1000)
   return async () => {
     cb()
+    console.log(`Lock removed after ${Date.now() - before}ms`)
     await new Promise(r => setTimeout(r, 200))
     client.quit()
   }
