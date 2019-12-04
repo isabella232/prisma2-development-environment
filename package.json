@@ -7,6 +7,7 @@
   "devDependencies": {
     "@types/debug": "^4.1.5",
     "@types/node": "^12.12.14",
+    "@types/redis": "^2.8.14",
     "arg": "^4.1.2",
     "batching-toposort": "^1.2.0",
     "chalk": "^3.0.0",
@@ -16,9 +17,11 @@
     "globby": "^10.0.1",
     "p-map": "^3.0.0",
     "p-reduce": "^2.1.0",
+    "redis": "^2.8.0",
+    "redis-lock": "^0.1.4",
     "semver": "^6.3.0",
     "ts-node": "^8.5.4",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.3"
   },
   "scripts": {
     "setup": "ts-node scripts/setup.ts",

@@ -13,6 +13,7 @@ services:
       - UPDATE_STUDIO
       - BUILDKITE
       - PUBLISH_BUILD=true
+      - REDIS_URL
     depends_on:
       - postgres
   postgres:

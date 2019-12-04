@@ -5,9 +5,9 @@ import globby from 'globby'
 import topo from 'batching-toposort'
 import { promises as fs } from 'fs'
 import arg from 'arg'
-import pMap from 'p-map'
 import semver from 'semver'
 import pReduce from 'p-reduce'
+import redis from 'redis'
 
 export type Commit = {
   date: Date
@@ -552,89 +552,113 @@ async function publish() {
     args['--publish'] = true
   }
 
-  const rawPackages = await getPackages()
-  const packages = getPackageDependencies(rawPackages)
-  const circles = getCircularDependencies(packages)
-  if (circles.length > 0) {
-    throw new Error(`Oops, there are circular dependencies: ${circles}`)
-  }
-
-  const changes = await getLatestChanges(
-    args['--all-repos'],
-    args['--repo'],
-    args['--dirty'] ||
-      (!args['--publish'] && !args['--release'] && !args['--dry-run']),
-  )
-
-  if (!args['--publish'] && !args['--test-all']) {
-    console.log(chalk.bold(`Changed files:`))
-    console.log(changes.map(c => `  ${c}`).join('\n'))
-  }
-  const prisma2Version =
-    args['--release'] || (await getNewPrisma2Version(packages))
-
-  const changedPackages = await getPackagesAffectedByChange(
-    packages,
-    changes,
-    Boolean(args['--release'] || process.env.UPDATE_STUDIO),
-    prisma2Version,
-  )
-
-  if (process.env.UPDATE_STUDIO) {
+  let unlock: undefined | (() => void)
+  if (process.env.BUILDKITE && args['--publish']) {
     console.log(
-      chalk.bold(
-        `UPDATE_STUDIO is set, so we only update photon and all dependants.`,
-      ),
+      `We're in buildkite and will publish, so we will acquire a lock...`,
     )
+    const before = Date.now()
+    unlock = await acquireLock()
+    const after = Date.now()
+    console.log(`Acquired lock after ${after - before}ms`)
   }
 
-  let publishOrder = getPublishOrder(
-    args['--test-all'] ? packages : changedPackages,
-  )
-
-  if (
-    !args['--dry-run'] &&
-    (!args['--publish'] ||
-      args['--test-changed'] ||
-      args['--release'] ||
-      args['--test-all'])
-  ) {
-    if (args['--test-all']) {
-      console.log('Testing all')
+  try {
+    const rawPackages = await getPackages()
+    const packages = getPackageDependencies(rawPackages)
+    const circles = getCircularDependencies(packages)
+    if (circles.length > 0) {
+      throw new Error(`Oops, there are circular dependencies: ${circles}`)
     }
-    await testPackages(
-      args['--test-all'] ? packages : changedPackages,
-      publishOrder,
-    )
-  }
 
-  if (args['--publish'] || args['--dry-run']) {
-    // We know, that Photon and Prisma2 are always part of the release.
-    // Therefore, also lift is also always part of the release, as it depends on photon.
-    // We can therefore safely update studio, as lift and prisma2 are depending on studio
+    const changes = await getLatestChanges(
+      args['--all-repos'],
+      args['--repo'],
+      args['--dirty'] ||
+        (!args['--publish'] && !args['--release'] && !args['--dry-run']),
+    )
+
+    if (!args['--publish'] && !args['--test-all']) {
+      console.log(chalk.bold(`Changed files:`))
+      console.log(changes.map(c => `  ${c}`).join('\n'))
+    }
+    const prisma2Version =
+      args['--release'] || (await getNewPrisma2Version(packages))
+
+    const changedPackages = await getPackagesAffectedByChange(
+      packages,
+      changes,
+      Boolean(args['--release'] || process.env.UPDATE_STUDIO),
+      prisma2Version,
+    )
 
     if (process.env.UPDATE_STUDIO) {
-      const latestStudioVersion = await runResult(
-        '.',
-        'npm info @prisma/studio-transports version',
-      )
       console.log(
-        `UPDATE_STUDIO set true, so we're updating it to ${latestStudioVersion}`,
-      )
-      await run(
-        '.',
-        `pnpm update  -r @prisma/studio@${latestStudioVersion} @prisma/studio-transports@${latestStudioVersion} @prisma/studio-server@${latestStudioVersion}`,
+        chalk.bold(
+          `UPDATE_STUDIO is set, so we only update photon and all dependants.`,
+        ),
       )
     }
 
-    await publishPackages(
-      packages,
-      changedPackages,
-      publishOrder,
-      args['--dry-run'],
-      prisma2Version,
-      args['--release'],
+    let publishOrder = getPublishOrder(
+      args['--test-all'] ? packages : changedPackages,
     )
+
+    if (
+      !args['--dry-run'] &&
+      (!args['--publish'] ||
+        args['--test-changed'] ||
+        args['--release'] ||
+        args['--test-all'])
+    ) {
+      if (args['--test-all']) {
+        console.log('Testing all')
+      }
+      await testPackages(
+        args['--test-all'] ? packages : changedPackages,
+        publishOrder,
+      )
+    }
+
+    if (args['--publish'] || args['--dry-run']) {
+      // We know, that Photon and Prisma2 are always part of the release.
+      // Therefore, also lift is also always part of the release, as it depends on photon.
+      // We can therefore safely update studio, as lift and prisma2 are depending on studio
+
+      if (process.env.UPDATE_STUDIO) {
+        const latestStudioVersion = await runResult(
+          '.',
+          'npm info @prisma/studio-transports version',
+        )
+        console.log(
+          `UPDATE_STUDIO set true, so we're updating it to ${latestStudioVersion}`,
+        )
+        await run(
+          '.',
+          `pnpm update  -r @prisma/studio@${latestStudioVersion} @prisma/studio-transports@${latestStudioVersion} @prisma/studio-server@${latestStudioVersion}`,
+        )
+      }
+
+      await publishPackages(
+        packages,
+        changedPackages,
+        publishOrder,
+        args['--dry-run'],
+        prisma2Version,
+        args['--release'],
+      )
+    }
+  } catch (e) {
+    if (unlock) {
+      unlock()
+      unlock = undefined
+    }
+    throw e
+  } finally {
+    if (unlock) {
+      unlock()
+      unlock = undefined
+    }
   }
 }
 
@@ -869,6 +893,26 @@ async function publishPackages(
       }
     }
   }
+}
+
+async function acquireLock(): Promise<() => void> {
+  if (!process.env.REDIS_URL) {
+    const before = Date.now()
+    console.log(chalk.bold.red(`REDIS_URL missing. Setting dummy lock`))
+    return () => {
+      console.log(`Lock removed after ${Date.now() - before}ms`)
+    }
+  }
+  const client = redis.createClient({
+    url: process.env.REDIS_URL,
+    retry_strategy: options => {
+      return 1000
+    },
+  })
+  const lock = promisify(require('redis-lock')(client))
+
+  // get a lock of max 10 min
+  return await lock('prisma2-build', 10 * 60 * 1000)
 }
 
 async function getCurrentVersion(
