@@ -841,7 +841,7 @@ async function publishPackages(
     }
   }
 
-  if (process.env.BUILDKITE) {
+  if (process.env.UPDATE_STUDIO) {
     await run('.', `git config --global user.email "prismabots@gmail.com"`)
     await run('.', `git config --global user.name "prisma-bot"`)
   }
