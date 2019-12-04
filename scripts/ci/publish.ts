@@ -822,45 +822,50 @@ async function publishPackages(
     await run('.', `git config --global user.name "prisma-bot"`)
   }
 
-  // commit and push it :)
-  const repos = ['lift', 'photonjs', 'prisma2']
-  for (const repo of repos) {
-    const messages = await getCommitMessages(repo, changedPackages)
-    if (messages.length > 0) {
-      // we try catch this, as this is not necessary for CI to succeed
-      await run(repo, `git pull origin master --no-edit`)
-      try {
-        const unsavedChanges = await getUnsavedChanges(repo)
-        if (!unsavedChanges) {
-          console.log(
-            `\n${chalk.bold(
-              'Skipping',
-            )} commiting changes of ${chalk.cyanBright(
-              `./${repo}`,
-            )} as they're already commited`,
-          )
-        } else {
-          console.log(`\nCommiting changes of ${chalk.cyanBright(`./${repo}`)}`)
-          await commitChanges(repo, messages, dryRun)
+  // for now only push when studio is being updated
+  if (!process.env.BUILDKITE || process.env.UPDATE_STUDIO) {
+    // commit and push it :)
+    const repos = ['lift', 'photonjs', 'prisma2']
+    for (const repo of repos) {
+      const messages = await getCommitMessages(repo, changedPackages)
+      if (messages.length > 0) {
+        // we try catch this, as this is not necessary for CI to succeed
+        await run(repo, `git pull origin master --no-edit`)
+        try {
+          const unsavedChanges = await getUnsavedChanges(repo)
+          if (!unsavedChanges) {
+            console.log(
+              `\n${chalk.bold(
+                'Skipping',
+              )} commiting changes of ${chalk.cyanBright(
+                `./${repo}`,
+              )} as they're already commited`,
+            )
+          } else {
+            console.log(
+              `\nCommiting changes of ${chalk.cyanBright(`./${repo}`)}`,
+            )
+            await commitChanges(repo, messages, dryRun)
+          }
+          const unpushedCommitCount = await getUnpushedCommitCount(repo)
+          if (unpushedCommitCount === 0) {
+            console.log(
+              `${chalk.bold('Skipping')} pushing commits of ${chalk.cyanBright(
+                `./${repo}`,
+              )} as they're already pushed`,
+            )
+          } else {
+            console.log(
+              `There are ${unpushedCommitCount} unpushed local commits in ${chalk.cyanBright(
+                `./${repo}`,
+              )}`,
+            )
+            await push(repo, dryRun)
+          }
+        } catch (e) {
+          console.error(e)
+          console.error(`Ignoring this error, continuing`)
         }
-        const unpushedCommitCount = await getUnpushedCommitCount(repo)
-        if (unpushedCommitCount === 0) {
-          console.log(
-            `${chalk.bold('Skipping')} pushing commits of ${chalk.cyanBright(
-              `./${repo}`,
-            )} as they're already pushed`,
-          )
-        } else {
-          console.log(
-            `There are ${unpushedCommitCount} unpushed local commits in ${chalk.cyanBright(
-              `./${repo}`,
-            )}`,
-          )
-          await push(repo, dryRun)
-        }
-      } catch (e) {
-        console.error(e)
-        console.error(`Ignoring this error, continuing`)
       }
     }
   }
