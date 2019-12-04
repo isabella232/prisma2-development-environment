@@ -8,6 +8,7 @@ import arg from 'arg'
 import semver from 'semver'
 import pReduce from 'p-reduce'
 import redis from 'redis'
+import { promisify } from 'util'
 
 export type Commit = {
   date: Date
