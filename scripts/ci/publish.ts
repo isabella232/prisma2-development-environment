@@ -913,7 +913,12 @@ async function acquireLock(): Promise<() => void> {
   const lock = promisify(require('redis-lock')(client))
 
   // get a lock of max 10 min
-  return await lock('prisma2-build', 10 * 60 * 1000)
+  const cb = await lock('prisma2-build', 10 * 60 * 1000)
+  return async () => {
+    cb()
+    await new Promise(r => setTimeout(r, 200))
+    client.quit()
+  }
 }
 
 async function getCurrentVersion(
