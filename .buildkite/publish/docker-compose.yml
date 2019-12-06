@@ -12,6 +12,7 @@ services:
       - GITHUB_TOKEN
       - UPDATE_STUDIO
       - BUILDKITE
+      - BUILDKITE_TAG
       - PUBLISH_BUILD=true
       - REDIS_URL
     depends_on:
