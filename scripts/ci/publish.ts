@@ -508,7 +508,7 @@ async function publish() {
     )
   }
 
-  if (process.env.BUILDKITE_TAG) {
+  if (args['--publish'] && process.env.BUILDKITE_TAG) {
     if (args['--release']) {
       throw new Error(
         `Can't provide env var BUILDKITE_TAG and --release at the same time`,
