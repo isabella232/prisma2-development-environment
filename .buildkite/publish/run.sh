@@ -3,7 +3,7 @@
 set -ex
 
 
-npm i -g pnpm yarn
+npm i -g pnpm@next yarn
 pnpm i
 
 pnpm run setup
