@@ -5,6 +5,7 @@ set -ex
 
 npm i -g pnpm@next
 npm i -g yarn || echo "Ok"
+yarn --version || echo "Ok"
 pnpm i
 
 pnpm run setup
