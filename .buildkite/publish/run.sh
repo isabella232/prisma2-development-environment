@@ -3,7 +3,8 @@
 set -ex
 
 
-npm i -g pnpm@next yarn
+npm i -g pnpm@next
+npm i -g yarn || echo "Ok"
 pnpm i
 
 pnpm run setup

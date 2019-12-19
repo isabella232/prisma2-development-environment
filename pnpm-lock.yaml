@@ -211,8 +211,10 @@ importers:
       https-proxy-agent: 3.0.1
       make-dir: 3.0.0
       node-fetch: 2.6.0
+      p-map: 3.0.0
       p-retry: 4.2.0
       progress: 2.0.3
+      rimraf: 3.0.0
     devDependencies:
       '@types/fs-extra': 8.0.1
       '@types/node': 12.12.14
@@ -235,8 +237,10 @@ importers:
       make-dir: ^3.0.0
       ncc: ^0.3.6
       node-fetch: ^2.6.0
+      p-map: ^3.0.0
       p-retry: ^4.2.0
       progress: ^2.0.3
+      rimraf: ^3.0.0
       typescript: ^3.7.3
   photonjs/packages/get-platform:
     dependencies:
@@ -579,6 +583,7 @@ importers:
       tar: 5.0.5
       temp-write: 4.0.0
       tempy: 0.3.0
+      url-parse: 1.4.7
     devDependencies:
       '@types/jest': 24.0.22
       '@types/node': 12.12.7
@@ -626,6 +631,7 @@ importers:
       ts-jest: ^24.2.0
       ts-node: ^8.5.4
       typescript: ^3.7.3
+      url-parse: ^1.4.7
 lockfileVersion: 5.1
 packages:
   /@apexearth/copy/1.4.4:
@@ -10416,6 +10422,10 @@ packages:
       node: '>=0.4.x'
     resolution:
       integrity: sha1-sgmEkgO7Jd+CDadW50cAWHhSFiA=
+  /querystringify/2.1.1:
+    dev: false
+    resolution:
+      integrity: sha512-w7fLxIRCRT7U8Qu53jQnJyPkYZIaR4n5151KMfcJlO/A9397Wxb1amJvROTK6TOnp7PfoAmg/qXiNHI+08jRfA==
   /quick-lru/1.1.0:
     dev: true
     engines:
@@ -10861,7 +10871,6 @@ packages:
     resolution:
       integrity: sha512-qhM/y57enGWHAe3v/NcwML6a3/vfESLe/sGM2dII+gEO0BpKRUkWZow/tyloNqJyN6kXSl3RyyM8Ll5D/sJP8g==
   /requires-port/1.0.0:
-    dev: true
     resolution:
       integrity: sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
   /resolve-cwd/2.0.0:
@@ -12714,6 +12723,13 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-FrXK/Afb42dsGxmZF3gj1lA6yww=
+  /url-parse/1.4.7:
+    dependencies:
+      querystringify: 2.1.1
+      requires-port: 1.0.0
+    dev: false
+    resolution:
+      integrity: sha512-d3uaVyzDB9tQoSXFvuSUNFibTd9zxd2bkVrDRvF5TmvWWQwqE4lgYJ5m+x1DbecWkw+LK4RNl2CU1hHuOKPVlg==
   /url/0.11.0:
     dependencies:
       punycode: 1.3.2
