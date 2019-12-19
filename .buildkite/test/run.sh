@@ -2,7 +2,7 @@
 
 set -ex
 
-npm i -g pnpm yarn
+npm i -g pnpm
 pnpm i
 
 pnpm run setup
