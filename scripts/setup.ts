@@ -69,7 +69,7 @@ function cloneOrPull(repo: string) {
 }
 
 function repoUrl(repo: string, org: string = 'prisma') {
-  return `https://github.com/${org}/${repo}.git`
+  return `git@github.com:${org}/${repo}.git`
 }
 
 export async function run(cwd: string, cmd: string): Promise<void> {
