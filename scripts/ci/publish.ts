@@ -233,7 +233,7 @@ export async function getPackages(): Promise<RawPackages> {
       'photonjs/packages/**/package.json',
     ],
     {
-      ignore: ['**/node_modules/**', '**/examples/**'],
+      ignore: ['**/node_modules/**', '**/examples/**', '**/fixtures/**'],
     } as any, // TODO: Apparently upgrading to ts 3.7.2 broke this
   )
   const packages = await Promise.all(
