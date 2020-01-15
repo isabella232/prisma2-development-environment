@@ -342,7 +342,7 @@ async function getPackagesAffectedByChange(
 ): Promise<ChangedPackages> {
   const changedPackages = prisma2AndPhotonOnly
     ? Object.values(packages).filter(p =>
-        ['@prisma/photon', 'prisma2'].includes(p.name),
+        ['@prisma/client', 'prisma2'].includes(p.name),
       )
     : Object.values(packages).filter(p =>
         changes.find(c => c.startsWith(path.dirname(p.path))),
@@ -355,8 +355,8 @@ async function getPackagesAffectedByChange(
 
   // If photon.js is not yet part of it, it has to
   // as we always need to release the same version of prisma2 and photonjs
-  if (!affectedPackages['@prisma/photon']) {
-    affectedPackages['@prisma/photon'] = packages['@prisma/photon']
+  if (!affectedPackages['@prisma/client']) {
+    affectedPackages['@prisma/client'] = packages['@prisma/client']
   }
 
   function addDependants(pkg: Package) {
@@ -394,11 +394,11 @@ async function getPackagesAffectedByChange(
 function getCommitMessages(dir: string, packages: Packages): string[] {
   const messages = Object.values(packages)
     .sort((a, b) => {
-      if (['@prisma/photon', 'prisma2'].includes(a.name)) {
+      if (['@prisma/client', 'prisma2'].includes(a.name)) {
         return -1
       }
 
-      if (['@prisma/photon', 'prisma2'].includes(b.name)) {
+      if (['@prisma/client', 'prisma2'].includes(b.name)) {
         return 1
       }
 
@@ -433,10 +433,10 @@ export function getPublishOrder(packages: Packages): string[][] {
  */
 async function getNewPrisma2Version(packages: Packages): Promise<string> {
   const localPrisma2Version = packages['prisma2'].version
-  const localPhotonVersion = packages['@prisma/photon'].version
+  const localPhotonVersion = packages['@prisma/client'].version
   const [remotePrisma2Version, remotePhotonVersion] = await Promise.all([
     runResult('.', `npm info prisma2@alpha version`),
-    runResult('.', `npm info @prisma/photon@alpha version`),
+    runResult('.', `npm info @prisma/client@alpha version`),
   ])
 
   const regex = /alpha\.(\d+)/
@@ -698,7 +698,7 @@ function intersection<T>(arr1: T[], arr2: T[]): T[] {
 
 // Parent "version updating function", uses `patch` and `patchVersion`
 async function newVersion(pkg: Package, prisma2Version: string) {
-  const isPrisma2OrPhoton = ['prisma2', '@prisma/photon'].includes(pkg.name)
+  const isPrisma2OrPhoton = ['prisma2', '@prisma/client'].includes(pkg.name)
   return isPrisma2OrPhoton ? prisma2Version : await patch(pkg)
 }
 
@@ -812,7 +812,7 @@ async function publishPackages(
       // }
       const pkg = packages[pkgName]
       const pkgDir = path.dirname(pkg.path)
-      const isPrisma2OrPhoton = ['prisma2', '@prisma/photon'].includes(pkgName)
+      const isPrisma2OrPhoton = ['prisma2', '@prisma/client'].includes(pkgName)
       const tag =
         prisma2Version.includes('alpha') && isPrisma2OrPhoton
           ? 'alpha'
