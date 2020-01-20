@@ -10,7 +10,7 @@ pnpm run setup
 
 ### Developing Lift
 
-1. `cd lift/examples/blog`
+1. `cd lift/fixtures/blog`
 2. `ts-node ../../src/bin.ts up`
 
 ### Developing `prisma2 init` Command
