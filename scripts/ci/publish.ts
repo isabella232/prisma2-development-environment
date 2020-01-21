@@ -23,17 +23,17 @@ async function getLatestChanges(
   repo?: string,
   dirty?: boolean,
 ): Promise<string[]> {
-  if (repo && !['prisma2', 'lift', 'photonjs']) {
+  if (repo && !['prisma2', 'migrate', 'prisma-client-js']) {
     throw new Error(
-      `Provided repo ${repo} does not exist. Please choose either prisma2, lift or photonjs.`,
+      `Provided repo ${repo} does not exist. Please choose either prisma2, migrate or prisma-client-js.`,
     )
   }
 
   if (!dirty) {
     await Promise.all([
       ensureChangedAreSaved('prisma2'),
-      ensureChangedAreSaved('lift'),
-      ensureChangedAreSaved('photonjs'),
+      ensureChangedAreSaved('migrate'),
+      ensureChangedAreSaved('prisma-client-js'),
     ])
   }
 
@@ -41,8 +41,8 @@ async function getLatestChanges(
     ? [await getLatestCommit(repo)]
     : await Promise.all([
         getLatestCommit('prisma2'),
-        getLatestCommit('lift'),
-        getLatestCommit('photonjs'),
+        getLatestCommit('migrate'),
+        getLatestCommit('prisma-client-js'),
       ])
 
   commits.sort((a, b) => {
@@ -228,9 +228,9 @@ type RawPackages = { [packageName: string]: RawPackage }
 export async function getPackages(): Promise<RawPackages> {
   const packagePaths = await globby(
     [
-      'lift/package.json',
+      'migrate/package.json',
       'prisma2/cli/**/package.json',
-      'photonjs/packages/**/package.json',
+      'prisma-client-js/packages/**/package.json',
     ],
     {
       ignore: ['**/node_modules/**', '**/examples/**', '**/fixtures/**'],
@@ -354,7 +354,7 @@ async function getPackagesAffectedByChange(
   }, {})
 
   // If photon.js is not yet part of it, it has to
-  // as we always need to release the same version of prisma2 and photonjs
+  // as we always need to release the same version of prisma2 and prisma-client-js
   if (!affectedPackages['@prisma/client']) {
     affectedPackages['@prisma/client'] = packages['@prisma/client']
   }
@@ -485,7 +485,7 @@ async function publish() {
   }
 
   if (args['--pull']) {
-    const repos = ['lift', 'photonjs', 'prisma2']
+    const repos = ['migrate', 'prisma-client-js', 'prisma2']
     for (const repo of repos) {
       console.log(`\nPulling ${chalk.cyanBright(repo)}`)
       await run(repo, `git pull origin master --no-edit`)
@@ -494,7 +494,7 @@ async function publish() {
   }
 
   if (args['--status']) {
-    const repos = ['lift', 'photonjs', 'prisma2']
+    const repos = ['migrate', 'prisma-client-js', 'prisma2']
     for (const repo of repos) {
       console.log(`\nStatus for ${chalk.cyanBright(repo)}`)
       await run(repo, `git status`)
@@ -623,8 +623,8 @@ async function publish() {
 
     if (args['--publish'] || args['--dry-run']) {
       // We know, that Photon and Prisma2 are always part of the release.
-      // Therefore, also lift is also always part of the release, as it depends on photon.
-      // We can therefore safely update studio, as lift and prisma2 are depending on studio
+      // Therefore, also migrate is also always part of the release, as it depends on photon.
+      // We can therefore safely update studio, as migrate and prisma2 are depending on studio
 
       if (process.env.UPDATE_STUDIO) {
         const latestStudioVersion = await runResult(
@@ -850,7 +850,7 @@ async function publishPackages(
   // for now only push when studio is being updated
   if (!process.env.BUILDKITE || process.env.UPDATE_STUDIO) {
     // commit and push it :)
-    const repos = ['lift', 'photonjs', 'prisma2']
+    const repos = ['migrate', 'prisma-client-js', 'prisma2']
     for (const repo of repos) {
       const messages = await getCommitMessages(repo, changedPackages)
       if (messages.length > 0) {

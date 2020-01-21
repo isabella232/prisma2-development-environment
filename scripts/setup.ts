@@ -16,8 +16,8 @@ const debug = Debug('setup')
 async function main() {
   debug(`Cloning/Pulling all three main repos`)
   await Promise.all([
-    cloneOrPull('lift'),
-    cloneOrPull('photonjs'),
+    cloneOrPull('migrate'),
+    cloneOrPull('prisma-client-js'),
     cloneOrPull('prisma2'),
   ])
 

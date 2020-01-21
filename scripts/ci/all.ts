@@ -43,19 +43,19 @@ async function all() {
 
   console.log(
     '\n' +
-      chalk.cyanBright.bold(`lift `.padEnd(10)) +
+      chalk.cyanBright.bold(`migrate `.padEnd(10)) +
       chalk.bold(command) +
       '\n',
   )
-  await run(`lift`, command)
+  await run(`migrate`, command)
 
   console.log(
     '\n' +
-      chalk.cyanBright.bold(`photonjs `.padEnd(10)) +
+      chalk.cyanBright.bold(`prisma-client-js `.padEnd(10)) +
       chalk.bold(command) +
       '\n',
   )
-  await run(`photonjs`, command)
+  await run(`prisma-client-js`, command)
 }
 
 all()
