@@ -6,9 +6,9 @@ pnpm install
 pnpm run setup
 ```
 
-### [Developing Photon.js](https://github.com/prisma/photonjs/tree/master/packages/photon#contributing)
+### [Developing Prisma Client JS](https://github.com/prisma/prisma-client-js/tree/master/packages/photon#contributing)
 
-### Developing Lift
+### Developing Prisma Migrate
 
 1. `cd lift/fixtures/blog`
 2. `ts-node ../../src/bin.ts up`
@@ -19,7 +19,7 @@ pnpm run setup
 2. `mkdir test && cd test`
 3. `ts-node ../src/bin.ts`
 
-### Developing Prisma Framework CLI
+### Developing `prisma2` CLI
 
 1. `cd prisma2/cli/prisma2`
 2. `mkdir test && cd test`
