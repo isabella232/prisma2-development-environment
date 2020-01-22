@@ -36,8 +36,8 @@
   },
   "workspaces": {
     "packages": [
-      "lift",
-      "photonjs/packages/*",
+      "migrate",
+      "prisma-client-js/packages/*",
       "prisma2/cli/*"
     ],
     "nohoist": [
