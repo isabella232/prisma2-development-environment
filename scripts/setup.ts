@@ -68,7 +68,7 @@ async function cloneOrPull(repo: string) {
   if (fs.existsSync(path.join(__dirname, '../', repo))) {
     return run(repo, `git pull origin master`)
   } else {
-    await run('.', `git clone --depth=20 ${repoUrl(repo)}`)
+    await run('.', `git clone --depth=50 ${repoUrl(repo)}`)
     const envVar = getCommitEnvVar(repo)
     if (process.env[envVar]) {
       await run(repo, `git checkout ${process.env[envVar]}`)
