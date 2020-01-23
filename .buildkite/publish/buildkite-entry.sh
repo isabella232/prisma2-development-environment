@@ -4,6 +4,7 @@ echo "BUILDKITE_TAG"
 echo $BUILDKITE_TAG
 
 if [ "$DEVELOPMENT_ENVIRONMENT_COMMIT" ]; then
+  git stash
   git checkout $DEVELOPMENT_ENVIRONMENT_COMMIT
 fi
 
