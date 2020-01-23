@@ -18,6 +18,7 @@ services:
       - MIGRATE_COMMIT
       - PRISMA_CLIENT_JS_COMMIT
       - PRISMA2_COMMIT
+      - DEVELOPMENT_ENVIRONMENT_COMMIT
     depends_on:
       - postgres
   postgres:

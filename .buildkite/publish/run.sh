@@ -2,6 +2,9 @@
 
 set -ex
 
+if [ "$DEVELOPMENT_ENVIRONMENT_COMMIT" ]; then
+  git checkout $DEVELOPMENT_ENVIRONMENT_COMMIT
+fi
 
 npm i -g pnpm@next
 npm i -g yarn || echo "Ok"
