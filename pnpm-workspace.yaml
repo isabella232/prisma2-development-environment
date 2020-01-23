@@ -1,4 +1,4 @@
 packages:
-  - 'migrate'
-  - 'prisma-client-js/packages/*'
+  - 'lift'
+  - 'photonjs/packages/*'
   - 'prisma2/cli/*'
