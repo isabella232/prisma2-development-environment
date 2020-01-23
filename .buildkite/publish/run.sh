@@ -3,6 +3,7 @@
 set -ex
 
 if [ "$DEVELOPMENT_ENVIRONMENT_COMMIT" ]; then
+  git stash
   git checkout $DEVELOPMENT_ENVIRONMENT_COMMIT
 fi
 
