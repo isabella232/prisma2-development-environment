@@ -13,6 +13,10 @@ import {
 Debug.enable('setup')
 const debug = Debug('setup')
 
+function getCommitEnvVar(name: string): string {
+  return `${name.toUpperCase().replace(/-/g, '_')}_COMMIT`
+}
+
 async function main() {
   debug(`Cloning/Pulling all three main repos`)
   await Promise.all([
@@ -60,11 +64,15 @@ async function main() {
 
 main().catch(console.error)
 
-function cloneOrPull(repo: string) {
+async function cloneOrPull(repo: string) {
   if (fs.existsSync(path.join(__dirname, '../', repo))) {
     return run(repo, `git pull origin master`)
   } else {
-    return run('.', `git clone --depth=20 ${repoUrl(repo)}`)
+    await run('.', `git clone --depth=20 ${repoUrl(repo)}`)
+    const envVar = getCommitEnvVar(repo)
+    if (process.env[envVar]) {
+      await run(repo, `git checkout ${process.env[envVar]}`)
+    }
   }
 }
 
