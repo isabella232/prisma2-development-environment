@@ -10,7 +10,7 @@ pnpm run setup
 
 ### Developing Prisma Migrate
 
-1. `cd lift/fixtures/blog`
+1. `cd migrate/fixtures/blog`
 2. `ts-node ../../src/bin.ts up`
 
 ### Developing `prisma2 init` Command
