@@ -1,10 +1,12 @@
 # Prisma 2 Development Environment
 
-```
+```console
 npm install -g pnpm
 pnpm install
 pnpm run setup
 ```
+
+Note for Windows: Use the latest version of [Git Bash](https://gitforwindows.org/)
 
 ### [Developing Prisma Client JS](https://github.com/prisma/prisma-client-js/tree/master/packages/photon#contributing)
 
