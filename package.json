@@ -26,6 +26,8 @@
   "scripts": {
     "preinstall": "node -e \"!process.env.npm_config_user_agent.startsWith('pnpm/') && !console.log('Use pnpm install to install dependencies in this repository\\n') && process.exit(1)\"",
     "setup": "ts-node scripts/setup.ts",
+    "reset:all": "rm -Rf node_modules pnpm-lock.yaml && pnpm run reset",
+    "reset": "rm -Rf prisma2/* migrate/* prisma-client-js/* && cd prisma2/ && git reset --hard && cd ../migrate && git reset --hard && cd ../prisma-client-js && git reset --hard && echo 'Reset done! run `pnpm i && pnpm run setup`'",
     "download": "pnpm --prefix=./prisma-client-js/packages/engine-core/ run download && pnpm --prefix=./prisma-client-js/packages/photon/ run download && pnpm --prefix=./prisma2/cli/sdk/ run download && pnpm --prefix=./migrate/ run download",
     "dry": "ts-node scripts/ci/publish.ts --dry-run",
     "publish-all": "ts-node scripts/ci/publish.ts --publish",
