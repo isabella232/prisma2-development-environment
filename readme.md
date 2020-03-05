@@ -28,7 +28,7 @@ Note for Windows: Use the latest version of [Git Bash](https://gitforwindows.org
 3. `ts-node ../src/bin.ts generate`
 
 ### How to update all binaries
-```
+```bash
 cd prisma2/cli/sdk
 rm *engine*
 pnpm run download
