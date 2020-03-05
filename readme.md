@@ -29,15 +29,6 @@ Note for Windows: Use the latest version of [Git Bash](https://gitforwindows.org
 
 ### How to update all binaries
 ```bash
-cd prisma2/cli/sdk
-rm *engine*
-pnpm run download
-cd ../prisma2
-rm *engine*
-pnpm run download
-cd ../../../prisma-client-js/packages/photon
-rm *engine*
-pnpm run download
-cd ../engine-core
+# In the root directory
 pnpm run download
 ```
