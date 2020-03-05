@@ -26,3 +26,18 @@ Note for Windows: Use the latest version of [Git Bash](https://gitforwindows.org
 1. `cd prisma2/cli/prisma2`
 2. `mkdir test && cd test`
 3. `ts-node ../src/bin.ts generate`
+
+### How to update all binaries
+```
+cd prisma2/cli/sdk
+rm *engine*
+pnpm run download
+cd ../prisma2
+rm *engine*
+pnpm run download
+cd ../../../prisma-client-js/packages/photon
+rm *engine*
+pnpm run download
+cd ../engine-core
+pnpm run download
+```
