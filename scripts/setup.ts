@@ -62,9 +62,11 @@ async function main() {
   await run('.', 'pnpm i -r')
 }
 
-main().catch(console.error)
+if (!module.parent) {
+  main().catch(console.error)
+}
 
-async function cloneOrPull(repo: string) {
+export async function cloneOrPull(repo: string) {
   if (fs.existsSync(path.join(__dirname, '../', repo))) {
     return run(repo, `git pull origin master`)
   } else {

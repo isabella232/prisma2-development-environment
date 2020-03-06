@@ -9,6 +9,7 @@ import semver from 'semver'
 import pReduce from 'p-reduce'
 import redis from 'redis'
 import { promisify } from 'util'
+import { cloneOrPull } from '../setup'
 
 export type Commit = {
   date: Date
@@ -648,6 +649,12 @@ async function publish() {
         prisma2Version,
         args['--release'],
       )
+
+      try {
+        await tagEnginesRepo()
+      } catch (e) {
+        console.error(e)
+      }
     }
   } catch (e) {
     if (unlock) {
@@ -661,6 +668,36 @@ async function publish() {
       unlock = undefined
     }
   }
+}
+
+async function tagEnginesRepo() {
+  await cloneOrPull('prisma-engines')
+
+  const prisma2Path = path.resolve(
+    process.cwd(),
+    './prisma2/cli/prisma2/package.json',
+  )
+  const pkg = JSON.parse(await fs.readFile(prisma2Path, 'utf-8'))
+  const engineVersion = pkg.prisma.version
+  const packageVersion = pkg.version
+  await run(
+    'prisma-engines',
+    `git tag -a ${packageVersion} ${engineVersion} -m "${packageVersion}"`,
+  )
+
+  const remotes = (await runResult('prisma-engines', `git remote`))
+    .trim()
+    .split('\n')
+
+  if (!remotes.includes('origin-push')) {
+    await run(
+      'prisma-engines',
+      `git remote add origin-push https://${process.env.GITHUB_TOKEN}@github.com/prisma/prisma-engines.git`,
+      true,
+    )
+  }
+
+  await run(`prisma-engines`, `git push origin-push ${engineVersion}`, true)
 }
 
 /**
