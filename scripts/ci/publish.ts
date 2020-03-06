@@ -671,20 +671,8 @@ async function publish() {
 }
 
 async function tagEnginesRepo() {
+  /** Get ready */
   await cloneOrPull('prisma-engines')
-
-  const prisma2Path = path.resolve(
-    process.cwd(),
-    './prisma2/cli/prisma2/package.json',
-  )
-  const pkg = JSON.parse(await fs.readFile(prisma2Path, 'utf-8'))
-  const engineVersion = pkg.prisma.version
-  const packageVersion = pkg.version
-  await run(
-    'prisma-engines',
-    `git tag -a ${packageVersion} ${engineVersion} -m "${packageVersion}"`,
-  )
-
   const remotes = (await runResult('prisma-engines', `git remote`))
     .trim()
     .split('\n')
@@ -696,7 +684,25 @@ async function tagEnginesRepo() {
       true,
     )
   }
+  await run('.', `git config --global user.email "prismabots@gmail.com"`)
+  await run('.', `git config --global user.name "prisma-bot"`)
 
+  /** Get version */
+  const prisma2Path = path.resolve(
+    process.cwd(),
+    './prisma2/cli/prisma2/package.json',
+  )
+  const pkg = JSON.parse(await fs.readFile(prisma2Path, 'utf-8'))
+  const engineVersion = pkg.prisma.version
+  const packageVersion = pkg.version
+
+  /** Tag */
+  await run(
+    'prisma-engines',
+    `git tag -a ${packageVersion} ${engineVersion} -m "${packageVersion}"`,
+  )
+
+  /** Push */
   await run(`prisma-engines`, `git push origin-push ${engineVersion}`, true)
 }
 
