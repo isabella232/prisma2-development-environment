@@ -703,7 +703,7 @@ async function tagEnginesRepo() {
   )
 
   /** Push */
-  await run(`prisma-engines`, `git push origin-push ${engineVersion}`, true)
+  await run(`prisma-engines`, `git push origin-push ${engineVersion}`)
 }
 
 /**
