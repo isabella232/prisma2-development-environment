@@ -681,7 +681,6 @@ async function tagEnginesRepo() {
     await run(
       'prisma-engines',
       `git remote add origin-push https://${process.env.GITHUB_TOKEN}@github.com/prisma/prisma-engines.git`,
-      true,
     )
   }
   await run('.', `git config --global user.email "prismabots@gmail.com"`)
