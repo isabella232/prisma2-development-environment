@@ -7,11 +7,10 @@ if [ "$DEVELOPMENT_ENVIRONMENT_COMMIT" ]; then
   git checkout $DEVELOPMENT_ENVIRONMENT_COMMIT
 fi
 
-npm i -g node-pre-gyp
-npm i -g sqlite3 --unsafe-perm
 npm i -g pnpm@4.9.3
 npm i -g yarn || echo "Ok"
 yarn --version || echo "Ok"
+pnpm i -g sqlite3 --unsafe-perm
 pnpm i
 
 pnpm run setup
