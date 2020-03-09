@@ -31,7 +31,7 @@ services:
       - MYSQL_USER=prisma
       - MYSQL_PASSWORD=prisma
     volumes:
-      - mysql:/var/lib/mysql/data
+      - mysql:/var/lib/mysql
 
 volumes:
   postgres:
