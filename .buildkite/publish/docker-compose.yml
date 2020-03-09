@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 services:
   app:
     image: node:10
@@ -21,15 +21,25 @@ services:
       - DEVELOPMENT_ENVIRONMENT_COMMIT
     depends_on:
       - postgres
+
   postgres:
     image: postgres:10.3
     restart: always
     environment:
       - POSTGRES_USER=prisma
       - POSTGRES_PASSWORD=prisma
-
     volumes:
       - postgres:/var/lib/postgresql/data
 
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      - MYSQL_USER=prisma
+      - MYSQL_PASSWORD=prisma
+    volumes:
+      - mysql:/var/lib/mysql/data
+
 volumes:
   postgres:
+  mysql:
