@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 services:
   app:
     image: node:10
@@ -10,6 +10,7 @@ services:
       - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
     depends_on:
       - postgres
+
   postgres:
     image: postgres:10.3
     restart: always
@@ -20,5 +21,15 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      - MYSQL_USER=prisma
+      - MYSQL_PASSWORD=prisma
+    volumes:
+      - mysql:/var/lib/mysql/data
+
 volumes:
   postgres:
+  mysql:
