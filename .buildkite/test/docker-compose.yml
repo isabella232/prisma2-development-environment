@@ -8,8 +8,10 @@ services:
     command: /app/.buildkite/test/run.sh
     environment:
       - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
+      - TEST_MYSQL_URI=mysql://prisma:prisma@mysql:3306/prisma-dev
     depends_on:
       - postgres
+      - mysql
 
   postgres:
     image: postgres:10.3
