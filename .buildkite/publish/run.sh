@@ -8,7 +8,7 @@ if [ "$DEVELOPMENT_ENVIRONMENT_COMMIT" ]; then
 fi
 
 npm i -g node-pre-gyp
-npm i -g sqlite3
+npm i -g sqlite3 --unsafe-perm
 npm i -g pnpm@4.9.3
 npm i -g yarn || echo "Ok"
 yarn --version || echo "Ok"
