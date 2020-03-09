@@ -543,7 +543,7 @@ importers:
       '@types/mocha': 5.2.7
       '@types/mysql2': github.com/types/mysql2/583484cfbc124214b06a65d0ac87251212b3c5d2
       '@zeit/ncc': 0.21.0
-      better-sqlite3: 6.0.1
+      better-sqlite3: 5.4.3
       checkpoint-client: 1.0.7
       dotenv: 8.2.0
       jest: 25.1.0
@@ -581,12 +581,12 @@ importers:
       '@prisma/studio-transports': 0.202.0
       '@prisma/studio-types': 0.202.0
       '@sentry/node': 5.12.4
-      '@types/better-sqlite3': ^5.4.0
+      '@types/better-sqlite3': 5.4.0
       '@types/debug': ^4.1.5
       '@types/mocha': ^5.2.7
       '@types/mysql2': 'github:types/mysql2'
       '@zeit/ncc': 0.21.0
-      better-sqlite3: ^6.0.1
+      better-sqlite3: 5.4.3
       checkpoint-client: ^1.0.7
       dotenv: ^8.2.0
       jest: ^25.1.0
@@ -3980,16 +3980,14 @@ packages:
     dev: false
     resolution:
       integrity: sha512-oTkDz8lBsk+HQjJPVeHHejkse/PDaTFwTFVasoR1V3XEQw23KKdfNvRln3M9++qipIBObqVyhsvSGuquFebDvQ==
-  /better-sqlite3/6.0.1:
+  /better-sqlite3/5.4.3:
     dependencies:
-      bindings: 1.5.0
-      integer: 3.0.1
-      prebuild-install: 5.3.3
-      tar: 4.4.10
+      integer: 2.1.0
+      tar: 4.4.13
     dev: true
     requiresBuild: true
     resolution:
-      integrity: sha512-4aV1zEknM9g1a6B0mVBx1oIlmYioEJ8gSS3J6EpN1b1bKYEE+N5lmpmXHKNKTi0qjHziSd7XrXwHl1kpqvEcHQ==
+      integrity: sha512-fPp+8f363qQIhuhLyjI4bu657J/FfMtgiiHKfaTsj3RWDkHlWC1yT7c6kHZDnBxzQVoAINuzg553qKmZ4F1rEw==
   /bfj/6.1.2:
     dependencies:
       bluebird: 3.7.2
@@ -7577,14 +7575,11 @@ packages:
       node: '>=6.0.0'
     resolution:
       integrity: sha512-rSdC7zelHdRQFkWnhsMu2+2SO41mpv2oF2zy4tMhmiLWkcKbOAs87fWAJhVXttKVwhdZvymvnuM95EyEXg2/tQ==
-  /integer/3.0.1:
-    dependencies:
-      bindings: 1.5.0
-      prebuild-install: 5.3.3
+  /integer/2.1.0:
     dev: true
     requiresBuild: true
     resolution:
-      integrity: sha512-OqtER6W2GIJTIcnT5o2B/pWGgvurnVOYs4OZCgay40QEIbMTnNq4R0KSaIw1TZyFtPWjm5aNM+pBBMTfc3exmw==
+      integrity: sha512-vBtiSgrEiNocWvvZX1RVfeOKa2mCHLZQ2p9nkQkQZ/BvEiY+6CcUz0eyjvIiewjJoeNidzg2I+tpPJvpyspL1w==
   /interpret/1.2.0:
     dev: true
     engines:
@@ -12658,7 +12653,7 @@ packages:
     dev: true
     resolution:
       integrity: sha512-GZjLk64XcE/58qwIc1ZfXGqTSE4OutPMEkfBE/oh9eJ4x1eMRjYkgrLrav7PzddpvIpSJSGi8FgNNYXdB9Vumg==
-  /tar/4.4.10:
+  /tar/4.4.13:
     dependencies:
       chownr: 1.1.4
       fs-minipass: 1.2.7
@@ -12671,7 +12666,7 @@ packages:
     engines:
       node: '>=4.5'
     resolution:
-      integrity: sha512-g2SVs5QIxvo6OLp0GudTqEf05maawKUxXru104iaayWA09551tFCTI8f1Asb4lPfkBr91k07iL4c11XO3/b0tA==
+      integrity: sha512-w2VwSrBoHa5BsSyH+KxEqeQBAllHhccyMFVHtGtdMpF4W7IRWfZjFiQceJPChOeTsSDVUpER2T8FA93pr0L+QA==
   /tar/5.0.5:
     dependencies:
       chownr: 1.1.3
