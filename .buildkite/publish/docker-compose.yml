@@ -8,7 +8,7 @@ services:
     command: /app/.buildkite/publish/run.sh
     environment:
       - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
-      - TEST_MYSQL_URI=mysql://prisma:prisma@localhost:3306/tests
+      - TEST_MYSQL_URI=mysql://prisma:prisma@mysql:3306/tests
       - NPM_TOKEN
       - GITHUB_TOKEN
       - UPDATE_STUDIO
