@@ -4017,12 +4017,12 @@ packages:
       safe-buffer: 5.2.0
     resolution:
       integrity: sha512-e8tQYnZodmebYDWGH7KMRvtzKXaJHx3BbilrgZCfvyLUYdKpK1t5PSPmpkny/SgiTSCnjfLW7v5rlONXVFkQEA==
-  /bl/3.0.0:
+  /bl/4.0.1:
     dependencies:
-      readable-stream: 3.5.0
+      readable-stream: 3.6.0
     dev: true
     resolution:
-      integrity: sha512-EUAyP5UHU5hxF8BPT0LKW8gjYLhq1DQIcneOX/pL/m2Alo+OYDQAJlHq+yseMP50Os2nHXOSic6Ss3vSQeyf4A==
+      integrity: sha512-FL/TdvchukRCuWVxT0YMO/7+L5TNeNrVFvRU2IY63aUyv9mpt8splf2NEr6qXtPo5fya5a66YohQKvGNmLrWNA==
   /blacklist/1.1.4:
     dev: false
     resolution:
@@ -5341,7 +5341,7 @@ packages:
       integrity: sha1-gKTdMjdIOEv6JICDYirt7Jgq3/M=
   /decompress-response/4.2.1:
     dependencies:
-      mimic-response: 2.0.0
+      mimic-response: 2.1.0
     dev: true
     engines:
       node: '>=8'
@@ -9282,12 +9282,12 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-j5EctnkH7amfV/q5Hgmoal1g2QHFJRraOtmx0JpIqkxhBhI/lJSl1nMpQ45hVarwNETOoWEimndZ4QK0RHxuxQ==
-  /mimic-response/2.0.0:
+  /mimic-response/2.1.0:
     dev: true
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-8ilDoEapqA4uQ3TwS0jakGONKXVJqpy+RpM+3b7pLdOjghCrEiGp9SRkFbUHAmZW9vdnrENWHjaweIoTIJExSQ==
+      integrity: sha512-wXqjST+SLt7R009ySCglWBCFpjUygmCIfD790/kVbiGmUgfYGuB14PiTd5DwVxSV4NcYHjzMkoj5LjQZwTQLEA==
   /min-indent/1.0.0:
     engines:
       node: '>=4'
@@ -9494,10 +9494,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-fpoe2T0RbHwBTBUOftAfBPaDEi06ufaUai0mE6Yn1kacc3SnTErfb/h+X94VXzI64rKFHYImXSvdwGGCmwOqCA==
-  /napi-build-utils/1.0.1:
+  /napi-build-utils/1.0.2:
     dev: true
     resolution:
-      integrity: sha512-boQj1WFgQH3v4clhu3mTNfP+vOBxorDlE8EKiMjUlLG3C4qAESnn9AxIOkFgTR2c9LtzNjPrjS60cT27ZKBhaA==
+      integrity: sha512-ONmRUqK7zj7DWX0D9ADe03wbwOBZxNAfF20PlGfCWQcD3+/MakShIHrMqx9YwPTfxDdF1zLeL+RGZiR9kGMLdg==
   /natural-compare/1.4.0:
     dev: true
     resolution:
@@ -9533,12 +9533,12 @@ packages:
     dev: true
     resolution:
       integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
-  /node-abi/2.13.0:
+  /node-abi/2.15.0:
     dependencies:
       semver: 5.7.1
     dev: true
     resolution:
-      integrity: sha512-9HrZGFVTR5SOu3PZAnAY2hLO36aW1wmA+FDsVkr85BTST32TLCA1H/AEcatVRAsWLyXS3bqUDYCAjq5/QGuSTA==
+      integrity: sha512-FeLpTS0F39U7hHZU1srAK4Vx+5AHNVOTP+hxBNQknR/54laTHSFIJkDWDqiquY1LeLUgTfPN7sLPhMubx0PLAg==
   /node-addon-api/1.7.1:
     dev: true
     resolution:
@@ -10782,8 +10782,8 @@ packages:
       github-from-package: 0.0.0
       minimist: 1.2.0
       mkdirp: 0.5.1
-      napi-build-utils: 1.0.1
-      node-abi: 2.13.0
+      napi-build-utils: 1.0.2
+      node-abi: 2.15.0
       noop-logger: 0.1.1
       npmlog: 4.1.2
       pump: 3.0.0
@@ -11208,6 +11208,16 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-gSz026xs2LfxBPudDuI41V1lka8cxg64E66SGe78zJlsUofOg/yqwezdIcdfwik6B4h8LFmWPA9ef9X3FiNFLA==
+  /readable-stream/3.6.0:
+    dependencies:
+      inherits: 2.0.4
+      string_decoder: 1.3.0
+      util-deprecate: 1.0.2
+    dev: true
+    engines:
+      node: '>= 6'
+    resolution:
+      integrity: sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==
   /realpath-native/1.1.0:
     dependencies:
       util.promisify: 1.0.1
@@ -12618,10 +12628,10 @@ packages:
       integrity: sha512-2SqW2/WlGd2mP0ukqm8KQCou36O77zdqo2e+pp5viqGRIcHuUGB+TLA8OnzOh/wUAF6467htfNsWmWV92vufNQ==
   /tar-fs/2.0.0:
     dependencies:
-      chownr: 1.1.3
+      chownr: 1.1.4
       mkdirp: 0.5.1
       pump: 3.0.0
-      tar-stream: 2.1.0
+      tar-stream: 2.1.1
     dev: true
     resolution:
       integrity: sha512-vaY0obB6Om/fso8a8vakQBzwholQ7v5+uy+tF3Ozvxv1KNezmVQAiWtcNmMHFSFPqL3dJA8ha6gdtFbfX9mcxA==
@@ -12638,16 +12648,16 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-rzS0heiNf8Xn7/mpdSVVSMAWAoy9bfb1WOTYC78Z0UQKeKa/CWS8FOq0lKGNa8DWKAn9gxjCvMLYc5PGXYlK2A==
-  /tar-stream/2.1.0:
+  /tar-stream/2.1.1:
     dependencies:
-      bl: 3.0.0
+      bl: 4.0.1
       end-of-stream: 1.4.4
       fs-constants: 1.0.0
       inherits: 2.0.4
-      readable-stream: 3.5.0
+      readable-stream: 3.6.0
     dev: true
     resolution:
-      integrity: sha512-+DAn4Nb4+gz6WZigRzKEZl1QuJVOLtAwwF+WUxy1fJ6X63CaGaUAxJRD2KEn1OMfcbCjySTYpNC6WmfQoIEOdw==
+      integrity: sha512-GZjLk64XcE/58qwIc1ZfXGqTSE4OutPMEkfBE/oh9eJ4x1eMRjYkgrLrav7PzddpvIpSJSGi8FgNNYXdB9Vumg==
   /tar/4.4.10:
     dependencies:
       chownr: 1.1.4
@@ -13988,6 +13998,7 @@ packages:
     dev: true
     name: '@types/mysql'
     resolution:
+      registry: 'https://registry.npmjs.org/'
       tarball: 'https://codeload.github.com/types/mysql/tar.gz/41e381415afbb79452c0501ca3cf220c2cd390bc'
     version: 2.0.0
   github.com/types/mysql2/583484cfbc124214b06a65d0ac87251212b3c5d2:
@@ -13996,5 +14007,6 @@ packages:
     dev: true
     name: '@types/mysql2'
     resolution:
+      registry: 'https://registry.npmjs.org/'
       tarball: 'https://codeload.github.com/types/mysql2/tar.gz/583484cfbc124214b06a65d0ac87251212b3c5d2'
     version: 1.0.0
