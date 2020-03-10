@@ -15,10 +15,12 @@ pnpm i
 
 pnpm run setup
 
+cd prisma2/cli/prisma2
+pnpm i sqlite3 --unsafe-perm
+cd ../../..
+
 pnpm run test
 
-
 echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-
 
 pnpm run publish-all

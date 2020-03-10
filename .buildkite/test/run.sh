@@ -3,9 +3,12 @@
 set -ex
 
 npm i -g pnpm@4.9.3
-pnpm i -g sqlite3 --unsafe-perm
 pnpm i
 
 pnpm run setup
+
+cd prisma2/cli/prisma2
+pnpm i sqlite3 --unsafe-perm
+cd ../../..
 
 pnpm run test
