@@ -661,7 +661,7 @@ async function tagEnginesRepo(dryRun = false) {
   )
 
   /** Push */
-  await run(`prisma-engines`, `git push origin-push ${engineVersion}`, dryRun)
+  await run(`prisma-engines`, `git push origin-push ${packageVersion}`, dryRun)
 }
 
 /**
