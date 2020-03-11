@@ -264,12 +264,12 @@ interface Package {
   packageJson: any
 }
 
-interface ChangedPackage extends Package {
+interface PackageWithNewVersion extends Package {
   newVersion: string
 }
 
 type Packages = { [packageName: string]: Package }
-type ChangedPackages = { [packageName: string]: ChangedPackage }
+type PackagesWithNewVersions = { [packageName: string]: PackageWithNewVersion }
 
 export function getPackageDependencies(packages: RawPackages): Packages {
   const packageCache = Object.entries(packages).reduce<Packages>(
@@ -335,52 +335,12 @@ function getCircularDependencies(packages: Packages): string[][] {
   return circularDeps
 }
 
-async function getPackagesAffectedByChange(
+async function getNewPackageVersions(
   packages: Packages,
-  changes: string[],
-  prisma2AndPhotonOnly: boolean,
   prisma2Version: string,
-): Promise<ChangedPackages> {
-  const changedPackages = prisma2AndPhotonOnly
-    ? Object.values(packages).filter(p =>
-        ['@prisma/client', 'prisma2'].includes(p.name),
-      )
-    : Object.values(packages).filter(p =>
-        changes.find(c => c.startsWith(path.dirname(p.path))),
-      )
-
-  const affectedPackages: Packages = changedPackages.reduce((acc, p) => {
-    acc[p.name] = p
-    return acc
-  }, {})
-
-  // If photon.js is not yet part of it, it has to
-  // as we always need to release the same version of prisma2 and prisma-client-js
-  if (!affectedPackages['@prisma/client']) {
-    affectedPackages['@prisma/client'] = packages['@prisma/client']
-  }
-
-  function addDependants(pkg: Package) {
-    for (const dependency of pkg.usedBy) {
-      if (!affectedPackages[dependency]) {
-        affectedPackages[dependency] = packages[dependency]
-        addDependants(packages[dependency])
-      }
-    }
-    for (const devDependency of pkg.usedByDev) {
-      if (!affectedPackages[devDependency]) {
-        affectedPackages[devDependency] = packages[devDependency]
-        addDependants(packages[devDependency])
-      }
-    }
-  }
-
-  for (const pkg of Object.values(affectedPackages)) {
-    addDependants(pkg)
-  }
-
+): Promise<PackagesWithNewVersions> {
   return pReduce(
-    Object.values(affectedPackages),
+    Object.values(packages),
     async (acc, p) => {
       acc[p.name] = {
         ...p,
@@ -432,22 +392,29 @@ export function getPublishOrder(packages: Packages): string[][] {
  * For now supporting 2.0.0-alpha.X
  * @param packages Locla package definitions
  */
-async function getNewPrisma2Version(packages: Packages): Promise<string> {
-  const localPrisma2Version = packages['prisma2'].version
-  const localPhotonVersion = packages['@prisma/client'].version
-  const [remotePrisma2Version, remotePhotonVersion] = await Promise.all([
-    runResult('.', `npm info prisma2@alpha version`),
-    runResult('.', `npm info @prisma/client@alpha version`),
-  ])
+async function getNewAlphaVersion(packages: Packages): Promise<string> {
+  const before = Date.now()
+  console.log('\nCalculating new alpha version...')
+  const versions = flatten(
+    await Promise.all(
+      Object.values(packages).map(async pkg => {
+        const pkgVersions = [pkg.version]
+        const remoteVersion = await runResult(
+          '.',
+          `npm info ${pkg.name}@alpha version`,
+        )
+        if (remoteVersion && remoteVersion.length > 0) {
+          pkgVersions.push(remoteVersion)
+        }
 
-  const regex = /alpha\.(\d+)/
+        return pkgVersions
+      }),
+    ),
+  )
 
-  const alphaVersions = [
-    localPrisma2Version,
-    localPhotonVersion,
-    remotePrisma2Version,
-    remotePhotonVersion,
-  ]
+  const regex = /2\.0\.0-alpha\.(\d+)/
+
+  const alphaVersions = versions
     .filter(v => v.trim().length > 0)
     .map(v => {
       const match = regex.exec(v)
@@ -460,21 +427,21 @@ async function getNewPrisma2Version(packages: Packages): Promise<string> {
 
   const maxAlpha = Math.max(...alphaVersions)
 
-  return `2.0.0-alpha.${maxAlpha + 1}`
+  const version = `2.0.0-alpha.${maxAlpha + 1}`
+  console.log(`Got ${version} in ${Date.now() - before}ms`)
+  return version
 }
 
 async function publish() {
   const args = arg({
     '--publish': Boolean,
-    '--all-repos': Boolean,
     '--repo': String,
     '--dry-run': Boolean,
     '--release': String,
     '--dirty': Boolean,
     '--pull': Boolean,
     '--status': Boolean,
-    '--test-changed': Boolean,
-    '--test-all': Boolean,
+    '--test': Boolean,
   })
 
   if (
@@ -520,6 +487,10 @@ async function publish() {
       `Setting --release to BUILDKITE_TAG = ${process.env.BUILDKITE_TAG}`,
     )
     args['--release'] = process.env.BUILDKITE_TAG
+  }
+
+  if (!args['--test'] && !args['--publish'] && !args['--dry-run']) {
+    throw new Error('Please either provide --test or --publish or --dry-run')
   }
 
   if (args['--release']) {
@@ -580,17 +551,14 @@ async function publish() {
         (!args['--publish'] && !args['--release'] && !args['--dry-run']),
     )
 
-    if (!args['--publish'] && !args['--test-all']) {
-      console.log(chalk.bold(`Changed files:`))
-      console.log(changes.map(c => `  ${c}`).join('\n'))
-    }
-    const prisma2Version =
-      args['--release'] || (await getNewPrisma2Version(packages))
+    console.log(chalk.bold(`Changed files:`))
+    console.log(changes.map(c => `  ${c}`).join('\n'))
 
-    const changedPackages = await getPackagesAffectedByChange(
+    const prisma2Version =
+      args['--release'] || (await getNewAlphaVersion(packages))
+
+    const packagesWithVersions = await getNewPackageVersions(
       packages,
-      changes,
-      Boolean(args['--release'] || process.env.UPDATE_STUDIO),
       prisma2Version,
     )
 
@@ -602,24 +570,9 @@ async function publish() {
       )
     }
 
-    let publishOrder = getPublishOrder(
-      args['--test-all'] ? packages : changedPackages,
-    )
-
-    if (
-      !args['--dry-run'] &&
-      (!args['--publish'] ||
-        args['--test-changed'] ||
-        args['--release'] ||
-        args['--test-all'])
-    ) {
-      if (args['--test-all']) {
-        console.log('Testing all')
-      }
-      await testPackages(
-        args['--test-all'] ? packages : changedPackages,
-        publishOrder,
-      )
+    if (!args['--dry-run'] && args['--test']) {
+      console.log(chalk.bold('\nTesting packages'))
+      await testPackages(packages, getPublishOrder(packages))
     }
 
     if (args['--publish'] || args['--dry-run']) {
@@ -643,15 +596,15 @@ async function publish() {
 
       await publishPackages(
         packages,
-        changedPackages,
-        publishOrder,
+        packagesWithVersions,
+        getPublishOrder(packages),
         args['--dry-run'],
         prisma2Version,
         args['--release'],
       )
 
       try {
-        await tagEnginesRepo()
+        await tagEnginesRepo(args['--dry-run'])
       } catch (e) {
         console.error(e)
       }
@@ -670,7 +623,7 @@ async function publish() {
   }
 }
 
-async function tagEnginesRepo() {
+async function tagEnginesRepo(dryRun = false) {
   /** Get ready */
   await cloneOrPull('prisma-engines')
   const remotes = (await runResult('prisma-engines', `git remote`))
@@ -681,10 +634,15 @@ async function tagEnginesRepo() {
     await run(
       'prisma-engines',
       `git remote add origin-push https://${process.env.GITHUB_TOKEN}@github.com/prisma/prisma-engines.git`,
+      dryRun,
     )
   }
-  await run('.', `git config --global user.email "prismabots@gmail.com"`)
-  await run('.', `git config --global user.name "prisma-bot"`)
+  await run(
+    '.',
+    `git config --global user.email "prismabots@gmail.com"`,
+    dryRun,
+  )
+  await run('.', `git config --global user.name "prisma-bot"`, dryRun)
 
   /** Get version */
   const prisma2Path = path.resolve(
@@ -699,10 +657,11 @@ async function tagEnginesRepo() {
   await run(
     'prisma-engines',
     `git tag -a ${packageVersion} ${engineVersion} -m "${packageVersion}"`,
+    dryRun,
   )
 
   /** Push */
-  await run(`prisma-engines`, `git push origin-push ${engineVersion}`)
+  await run(`prisma-engines`, `git push origin-push ${engineVersion}`, dryRun)
 }
 
 /**
@@ -779,7 +738,7 @@ async function patch(pkg: Package): Promise<string> {
 
 async function publishPackages(
   packages: Packages,
-  changedPackages: ChangedPackages,
+  changedPackages: PackagesWithNewVersions,
   publishOrder: string[][],
   dryRun: boolean,
   prisma2Version: string,
@@ -806,11 +765,9 @@ async function publishPackages(
 
   console.log(
     chalk.blueBright(
-      `\n${publishStr}${chalk.bold(
-        String(Object.values(changedPackages).length),
-      )} packages. New prisma2 version: ${chalk.bold(
-        prisma2Version,
-      )}. Publish order:`,
+      `\n${chalk.bold.underline(prisma2Version)}: ${publishStr}${chalk.bold(
+        String(Object.values(packages).length),
+      )} packages. Publish order:`,
     ),
   )
   console.log(
@@ -848,18 +805,10 @@ async function publishPackages(
 
   for (const currentBatch of publishOrder) {
     for (const pkgName of currentBatch) {
-      // if (pkgName !== 'prisma2') {
-      //   console.log(`Skipping ${pkgName}`)
-      //   return
-      // }
       const pkg = packages[pkgName]
       const pkgDir = path.dirname(pkg.path)
-      const isPrisma2OrPhoton = ['prisma2', '@prisma/client'].includes(pkgName)
-      const tag =
-        prisma2Version.includes('alpha') && isPrisma2OrPhoton
-          ? 'alpha'
-          : 'latest'
-      const newVersion = isPrisma2OrPhoton ? prisma2Version : await patch(pkg)
+      const tag = prisma2Version.includes('alpha') ? 'alpha' : 'latest'
+      const newVersion = prisma2Version
 
       console.log(
         `\nPublishing ${chalk.magentaBright(
