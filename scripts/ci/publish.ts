@@ -828,6 +828,9 @@ async function publishPackages(
       }
 
       await writeVersion(pkgDir, newVersion, dryRun)
+      if (process.env.BUILDKITE) {
+        await run(pkgDir, `pnpm run build`, dryRun)
+      }
       await run(pkgDir, `pnpm publish --tag ${tag}`, dryRun)
     }
   }
