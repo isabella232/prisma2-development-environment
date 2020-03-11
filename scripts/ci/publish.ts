@@ -142,6 +142,7 @@ async function commitChanges(
 }
 
 async function push(dir: string, dry = false): Promise<void> {
+  const branch = await getBranch(dir)
   if (process.env.BUILDKITE) {
     if (!process.env.GITHUB_TOKEN) {
       throw new Error(`Missing env var GITHUB_TOKEN`)
@@ -154,9 +155,9 @@ async function push(dir: string, dry = false): Promise<void> {
         dry,
       )
     }
-    await run(dir, `git push --quiet --set-upstream origin-push master`, dry)
+    await run(dir, `git push --quiet --set-upstream origin-push ${branch}`, dry)
   } else {
-    await run(dir, `git push origin master`, dry)
+    await run(dir, `git push origin ${branch}`, dry)
   }
 }
 
@@ -387,6 +388,8 @@ export function getPublishOrder(packages: Packages): string[][] {
   return topo(dag)
 }
 
+type NpmChannel = 'alpha' | 'patch-preview'
+
 /**
  * Takes the max alpha version + 1
  * For now supporting 2.0.0-alpha.X
@@ -395,26 +398,27 @@ export function getPublishOrder(packages: Packages): string[][] {
 async function getNewAlphaVersion(packages: Packages): Promise<string> {
   const before = Date.now()
   console.log('\nCalculating new alpha version...')
-  const versions = flatten(
-    await Promise.all(
-      Object.values(packages).map(async pkg => {
-        const pkgVersions = [pkg.version]
-        const remoteVersion = await runResult(
-          '.',
-          `npm info ${pkg.name}@alpha version`,
-        )
-        if (remoteVersion && remoteVersion.length > 0) {
-          pkgVersions.push(remoteVersion)
-        }
+  const versions = await getAllVersions(packages, 'alpha')
+  const alphaVersions = getAlphaVersionIncrements(versions)
+  const maxAlpha = Math.max(...alphaVersions)
 
-        return pkgVersions
-      }),
-    ),
-  )
+  const version = `2.0.0-alpha.${maxAlpha + 1}`
+  console.log(`Got ${version} in ${Date.now() - before}ms`)
+  return version
+}
 
+async function getNewPatchPreviewVersion(packages: Packages): Promise<string> {
+  const versions = await getAllVersions(packages, 'patch-preview')
+  const currentPreview = getPreviewFromPatchBranch(process.env.PATCH_BRANCH)
+  const increments = getPatchVersionIncrements(versions, currentPreview)
+  const maxIncrement = Math.max(...increments, 0)
+
+  return `2.0.0-preview${currentPreview}-${maxIncrement + 1}`
+}
+
+function getAlphaVersionIncrements(versions: string[]): number[] {
   const regex = /2\.0\.0-alpha\.(\d+)/
-
-  const alphaVersions = versions
+  return versions
     .filter(v => v.trim().length > 0)
     .map(v => {
       const match = regex.exec(v)
@@ -424,12 +428,60 @@ async function getNewAlphaVersion(packages: Packages): Promise<string> {
       return null
     })
     .filter(v => v)
+}
 
-  const maxAlpha = Math.max(...alphaVersions)
+function getPatchVersionIncrements(
+  versions: string[],
+  preview: string,
+): number[] {
+  const regex = /2\.0\.0-preview(\d{3})-(\d+)/
+  return versions
+    .filter(v => v.trim().length > 0)
+    .map(v => {
+      const match = regex.exec(v)
+      if (
+        match &&
+        match[1] === preview && // only if the current version is in there, we're interested
+        match[2]
+      ) {
+        return Number(match[2])
+      }
+      return null
+    })
+    .filter(v => v)
+}
 
-  const version = `2.0.0-alpha.${maxAlpha + 1}`
-  console.log(`Got ${version} in ${Date.now() - before}ms`)
-  return version
+async function getAllVersions(
+  packages: Packages,
+  channel: string,
+): Promise<string[]> {
+  return flatten(
+    await Promise.all(
+      Object.values(packages).map(async pkg => {
+        const pkgVersions = [pkg.version]
+        const remoteVersion = await runResult(
+          '.',
+          `npm info ${pkg.name}@${channel} version`,
+        )
+        if (remoteVersion && remoteVersion.length > 0) {
+          pkgVersions.push(remoteVersion)
+        }
+
+        return pkgVersions
+      }),
+    ),
+  )
+}
+
+function getPreviewFromPatchBranch(preview: string): string | null {
+  const regex = /2\.0\.0-preview(\d{3})\.x/
+  const match = regex.exec(preview)
+
+  if (match) {
+    return match[1]
+  }
+
+  return null
 }
 
 async function publish() {
@@ -555,7 +607,9 @@ async function publish() {
     console.log(changes.map(c => `  ${c}`).join('\n'))
 
     const prisma2Version =
-      args['--release'] || (await getNewAlphaVersion(packages))
+      args['--release'] || process.env.PATCH_BRANCH
+        ? await getNewPatchPreviewVersion(packages)
+        : await getNewAlphaVersion(packages)
 
     const packagesWithVersions = await getNewPackageVersions(
       packages,
@@ -809,7 +863,11 @@ async function publishPackages(
     for (const pkgName of currentBatch) {
       const pkg = packages[pkgName]
       const pkgDir = path.dirname(pkg.path)
-      const tag = prisma2Version.includes('alpha') ? 'alpha' : 'latest'
+      const tag = process.env.PATCH_BRANCH
+        ? 'patch-preview'
+        : prisma2Version.includes('alpha')
+        ? 'alpha'
+        : 'latest'
       const newVersion = prisma2Version
 
       console.log(
@@ -936,4 +994,8 @@ if (!module.parent) {
     console.error(chalk.red.bold('Error: ') + (e.stack || e.message))
     process.exit(1)
   })
+}
+
+async function getBranch(dir: string) {
+  return runResult(dir, 'git rev-parse --symbolic-full-name --abbrev-ref HEAD')
 }

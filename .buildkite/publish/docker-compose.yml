@@ -1,4 +1,4 @@
-version: "3.7"
+version: '3.7'
 services:
   app:
     image: node:10
@@ -20,6 +20,7 @@ services:
       - PRISMA_CLIENT_JS_COMMIT
       - PRISMA2_COMMIT
       - DEVELOPMENT_ENVIRONMENT_COMMIT
+      - PATCH_BRANCH
     depends_on:
       - postgres
       - mysql
@@ -44,7 +45,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - '3306:3306'
 
 volumes:
   postgres:

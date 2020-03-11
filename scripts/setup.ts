@@ -16,10 +16,6 @@ function getCommitEnvVar(name: string): string {
   return `${name.toUpperCase().replace(/-/g, '_')}_COMMIT`
 }
 
-async function checkoutPatchBranch(patchBranch: string) {
-  console.log({ patchBranch })
-}
-
 async function main() {
   debug(`Cloning/Pulling all three main repos`)
   await Promise.all([
@@ -29,7 +25,8 @@ async function main() {
   ])
 
   if (process.env.PATCH_BRANCH) {
-    await checkoutPatchBranch(process.env.PATCH_BRANCH)
+    await checkoutPatchBranches(process.env.PATCH_BRANCH)
+    return
   }
 
   debug(`Installing dependencies, building packages`)
@@ -107,4 +104,43 @@ export async function run(cwd: string, cmd: string): Promise<void> {
       ) + (e.stack || e.message),
     )
   }
+}
+
+/**
+ * Runs a command and returns the resulting stdout in a Promise.
+ * @param cwd cwd for running the command
+ * @param cmd command to run
+ */
+async function runResult(cwd: string, cmd: string): Promise<string> {
+  try {
+    const result = await execa.command(cmd, {
+      cwd,
+      stdio: 'pipe',
+      shell: true,
+    })
+    return result.stdout
+  } catch (e) {
+    throw new Error(
+      chalk.red(
+        `Error running ${chalk.bold(cmd)} in ${chalk.underline(cwd)}:`,
+      ) + (e.stderr || e.stack || e.message),
+    )
+  }
+}
+
+async function checkoutPatchBranches(patchBranch: string) {
+  const repos = ['migrate', 'prisma2', 'prisma-client-js']
+  for (const repo of repos) {
+    const repoPath = path.join(__dirname, '../', repo)
+    if (await branchExists(repoPath, patchBranch)) {
+      await run(repoPath, `git checkout ${patchBranch}`)
+    } else {
+      await run(repoPath, `git checkout -b ${patchBranch}`)
+    }
+  }
+}
+
+async function branchExists(dir: string, branch: string): Promise<boolean> {
+  const output = await runResult(dir, `git branch --list ${branch}`)
+  return output.trim().length > 0
 }
