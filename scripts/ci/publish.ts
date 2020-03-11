@@ -765,7 +765,9 @@ async function publishPackages(
 
   console.log(
     chalk.blueBright(
-      `\n${chalk.bold.underline(prisma2Version)}: ${publishStr}${chalk.bold(
+      `\n${chalk.bold.underline(
+        prisma2Version,
+      )}: ${publishStr}(all) ${chalk.bold(
         String(Object.values(packages).length),
       )} packages. Publish order:`,
     ),
