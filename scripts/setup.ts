@@ -55,6 +55,10 @@ async function main() {
         const pkgDir = path.dirname(pkg.path)
         await run(pkgDir, 'pnpm run download')
       }
+      if (pkg.packageJson.scripts['ncc:download']) {
+        const pkgDir = path.dirname(pkg.path)
+        await run(pkgDir, 'pnpm run ncc:download')
+      }
     }
   }
 
