@@ -4,7 +4,6 @@ import Debug from 'debug'
 import fs from 'fs'
 import path from 'path'
 import pMap from 'p-map'
-import del from 'del'
 import {
   getPackages,
   getPublishOrder,
@@ -17,6 +16,10 @@ function getCommitEnvVar(name: string): string {
   return `${name.toUpperCase().replace(/-/g, '_')}_COMMIT`
 }
 
+async function checkoutPatchBranch(patchBranch: string) {
+  console.log({ patchBranch })
+}
+
 async function main() {
   debug(`Cloning/Pulling all three main repos`)
   await Promise.all([
@@ -24,6 +27,10 @@ async function main() {
     cloneOrPull('prisma-client-js'),
     cloneOrPull('prisma2'),
   ])
+
+  if (process.env.PATCH_BRANCH) {
+    await checkoutPatchBranch(process.env.PATCH_BRANCH)
+  }
 
   debug(`Installing dependencies, building packages`)
 
