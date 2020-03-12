@@ -555,13 +555,13 @@ async function publish() {
     }
     const currentVersion = await runResult('.', 'npm info prisma2 version')
     if (!semver.gt(args['--release'], currentVersion)) {
-      throw new Error(
-        `New release version ${chalk.bold.underline(
-          args['--release'],
-        )} is not greater than the current semver version ${chalk.bold.underline(
-          currentVersion,
-        )}`,
-      )
+      // throw new Error(
+      //   `New release version ${chalk.bold.underline(
+      //     args['--release'],
+      //   )} is not greater than the current semver version ${chalk.bold.underline(
+      //     currentVersion,
+      //   )}`,
+      // )
     }
     if (!args['--release'].includes('preview0')) {
       throw new Error(
