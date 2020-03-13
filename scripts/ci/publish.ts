@@ -30,13 +30,13 @@ async function getLatestChanges(
     )
   }
 
-  if (!dirty) {
-    await Promise.all([
-      ensureChangedAreSaved('prisma2'),
-      ensureChangedAreSaved('migrate'),
-      ensureChangedAreSaved('prisma-client-js'),
-    ])
-  }
+  // if (!dirty) {
+  //   await Promise.all([
+  //     ensureChangedAreSaved('prisma2'),
+  //     ensureChangedAreSaved('migrate'),
+  //     ensureChangedAreSaved('prisma-client-js'),
+  //   ])
+  // }
 
   const commits = repo
     ? [await getLatestCommit(repo)]
@@ -607,10 +607,9 @@ async function publish() {
     console.log(changes.map(c => `  ${c}`).join('\n'))
 
     const prisma2Version =
-      args['--release'] ||
-      (process.env.PATCH_BRANCH
+      args['--release'] || process.env.PATCH_BRANCH
         ? await getNewPatchPreviewVersion(packages)
-        : await getNewAlphaVersion(packages))
+        : await getNewAlphaVersion(packages)
 
     const packagesWithVersions = await getNewPackageVersions(
       packages,
