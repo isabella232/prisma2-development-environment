@@ -8,7 +8,7 @@ pnpm i
 pnpm run setup
 
 cd prisma2/cli/prisma2
-pnpm i sqlite3 --unsafe-perm
+pnpm i sqlite3@4.1.1 --unsafe-perm
 cd ../../..
 
 pnpm run test
