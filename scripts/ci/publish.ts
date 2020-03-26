@@ -553,7 +553,7 @@ async function publish() {
         )} is not a valid semver version.`,
       )
     }
-    const currentVersion = await runResult('.', 'npm info prisma2 version')
+    const currentVersion = await runResult('.', 'npm info @prisma/cli version')
     if (!semver.gt(args['--release'], currentVersion)) {
       // throw new Error(
       //   `New release version ${chalk.bold.underline(
@@ -753,7 +753,7 @@ function intersection<T>(arr1: T[], arr2: T[]): T[] {
 
 // Parent "version updating function", uses `patch` and `patchVersion`
 async function newVersion(pkg: Package, prisma2Version: string) {
-  const isPrisma2OrPhoton = ['prisma2', '@prisma/client'].includes(pkg.name)
+  const isPrisma2OrPhoton = ['@prisma/cli', '@prisma/client'].includes(pkg.name)
   return isPrisma2OrPhoton ? prisma2Version : await patch(pkg)
 }
 
@@ -837,7 +837,7 @@ async function publishPackages(
       chalk.red.bold(
         `\nThis will ${chalk.underline(
           'release',
-        )} a new version of prisma2 on latest: ${chalk.underline(
+        )} a new version of @prisma/cli on latest: ${chalk.underline(
           prisma2Version,
         )}`,
       ),
