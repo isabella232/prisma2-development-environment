@@ -393,7 +393,7 @@ type NpmChannel = 'alpha' | 'patch-preview'
 /**
  * Takes the max alpha version + 1
  * For now supporting 2.0.0-alpha.X
- * @param packages Locla package definitions
+ * @param packages Local package definitions
  */
 async function getNewAlphaVersion(packages: Packages): Promise<string> {
   const before = Date.now()
@@ -606,10 +606,15 @@ async function publish() {
     console.log(chalk.bold(`Changed files:`))
     console.log(changes.map(c => `  ${c}`).join('\n'))
 
-    const prisma2Version =
-      args['--release'] || process.env.PATCH_BRANCH
-        ? await getNewPatchPreviewVersion(packages)
-        : await getNewAlphaVersion(packages)
+    let prisma2Version
+    if (args['--release']) {
+      prisma2Version = args['--release']
+    } else if (process.env.PATCH_BRANCH) {
+      // TODO Check if PATCH_BRANCH work!
+      prisma2Version = await getNewPatchPreviewVersion(packages)
+    } else {
+      prisma2Version = await getNewAlphaVersion(packages)
+    }
 
     const packagesWithVersions = await getNewPackageVersions(
       packages,
