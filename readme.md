@@ -21,13 +21,14 @@ Note for Windows: Use the latest version of [Git Bash](https://gitforwindows.org
 2. `mkdir test && cd test`
 3. `ts-node ../src/bin.ts`
 
-### Developing `prisma2` CLI
+### Developing `@prisma/cli` CLI
 
 1. `cd prisma2/cli/prisma2`
 2. `mkdir test && cd test`
 3. `ts-node ../src/bin.ts generate`
 
 ### How to update all binaries
+
 ```bash
 # In the root directory
 pnpm run download
