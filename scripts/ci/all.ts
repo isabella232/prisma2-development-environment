@@ -37,9 +37,9 @@ async function all() {
   const command = argv.join(' ')
 
   console.log(
-    chalk.cyanBright.bold(`prisma2 `.padEnd(10)) + chalk.bold(command) + '\n',
+    chalk.cyanBright.bold(`prisma `.padEnd(10)) + chalk.bold(command) + '\n',
   )
-  await run(`prisma2`, command)
+  await run(`prisma`, command)
 
   console.log(
     '\n' +
