@@ -388,7 +388,7 @@ export function getPublishOrder(packages: Packages): string[][] {
   return topo(dag)
 }
 
-type NpmChannel = 'alpha' | 'patch-preview'
+type NpmChannel = 'alpha' | 'patch-beta'
 
 /**
  * Takes the max alpha version + 1
@@ -407,13 +407,13 @@ async function getNewAlphaVersion(packages: Packages): Promise<string> {
   return version
 }
 
-async function getNewPatchPreviewVersion(packages: Packages): Promise<string> {
-  const versions = await getAllVersions(packages, 'patch-preview')
-  const currentPreview = getPreviewFromPatchBranch(process.env.PATCH_BRANCH)
-  const increments = getPatchVersionIncrements(versions, currentPreview)
+async function getNewPatchBetaVersion(packages: Packages): Promise<string> {
+  const versions = await getAllVersions(packages, 'patch-beta')
+  const currentBeta = getBetaFromPatchBranch(process.env.PATCH_BRANCH)
+  const increments = getPatchVersionIncrements(versions, currentBeta)
   const maxIncrement = Math.max(...increments, 0)
 
-  return `2.0.0-preview${currentPreview}-${maxIncrement + 1}`
+  return `2.0.0-beta${currentBeta}-${maxIncrement + 1}`
 }
 
 function getAlphaVersionIncrements(versions: string[]): number[] {
@@ -430,18 +430,15 @@ function getAlphaVersionIncrements(versions: string[]): number[] {
     .filter(v => v)
 }
 
-function getPatchVersionIncrements(
-  versions: string[],
-  preview: string,
-): number[] {
-  const regex = /2\.0\.0-preview(\d{3})-(\d+)/
+function getPatchVersionIncrements(versions: string[], beta: string): number[] {
+  const regex = /2\.0\.0-beta(\d{3})-(\d+)/
   return versions
     .filter(v => v.trim().length > 0)
     .map(v => {
       const match = regex.exec(v)
       if (
         match &&
-        match[1] === preview && // only if the current version is in there, we're interested
+        match[1] === beta && // only if the current version is in there, we're interested
         match[2]
       ) {
         return Number(match[2])
@@ -473,9 +470,9 @@ async function getAllVersions(
   )
 }
 
-function getPreviewFromPatchBranch(preview: string): string | null {
-  const regex = /2\.0\.0-preview(\d{3})\.x/
-  const match = regex.exec(preview)
+function getBetaFromPatchBranch(beta: string): string | null {
+  const regex = /2\.0\.0-beta(\d{3})\.x/
+  const match = regex.exec(beta)
 
   if (match) {
     return match[1]
@@ -563,12 +560,12 @@ async function publish() {
       //   )}`,
       // )
     }
-    if (!args['--release'].includes('preview0')) {
+    if (!args['--release'].includes('beta0')) {
       throw new Error(
         `New release version ${chalk.bold.underline(
           args['--release'],
-        )} does not follow the preview naming scheme: ${chalk.bold.underline(
-          '2.0.0-preview0XX',
+        )} does not follow the beta naming scheme: ${chalk.bold.underline(
+          '2.0.0-beta0XX',
         )}`,
       )
     }
@@ -611,7 +608,7 @@ async function publish() {
       prisma2Version = args['--release']
     } else if (process.env.PATCH_BRANCH) {
       // TODO Check if PATCH_BRANCH work!
-      prisma2Version = await getNewPatchPreviewVersion(packages)
+      prisma2Version = await getNewPatchBetaVersion(packages)
     } else {
       prisma2Version = await getNewAlphaVersion(packages)
     }
@@ -869,7 +866,7 @@ async function publishPackages(
       const pkg = packages[pkgName]
       const pkgDir = path.dirname(pkg.path)
       const tag = process.env.PATCH_BRANCH
-        ? 'patch-preview'
+        ? 'patch-beta'
         : prisma2Version.includes('alpha')
         ? 'alpha'
         : 'latest'
