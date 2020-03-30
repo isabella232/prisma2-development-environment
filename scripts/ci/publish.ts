@@ -431,7 +431,7 @@ function getAlphaVersionIncrements(versions: string[]): number[] {
 }
 
 function getPatchVersionIncrements(versions: string[], beta: string): number[] {
-  const regex = /2\.0\.0-beta(\d{3})-(\d+)/
+  const regex = /2\.0\.0-beta(\d+)-(\d+)/
   return versions
     .filter(v => v.trim().length > 0)
     .map(v => {
@@ -471,7 +471,7 @@ async function getAllVersions(
 }
 
 function getBetaFromPatchBranch(beta: string): string | null {
-  const regex = /2\.0\.0-beta(\d{3})\.x/
+  const regex = /2\.0\.0-beta(\d+)\.x/
   const match = regex.exec(beta)
 
   if (match) {
@@ -560,12 +560,12 @@ async function publish() {
       //   )}`,
       // )
     }
-    if (!args['--release'].includes('beta0')) {
+    if (!args['--release'].startsWith('2.0.0-beta')) {
       throw new Error(
         `New release version ${chalk.bold.underline(
           args['--release'],
         )} does not follow the beta naming scheme: ${chalk.bold.underline(
-          '2.0.0-beta0XX',
+          '2.0.0-betaX',
         )}`,
       )
     }
