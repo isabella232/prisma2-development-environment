@@ -502,6 +502,9 @@ async function publish() {
   }
 
   if (process.env.DRY_RUN) {
+    console.log(
+      chalk.blue.bold(`\nThe DRY_RUN env var is set, so we'll do a dry run!\n`),
+    )
     args['--dry-run'] = true
   }
 
