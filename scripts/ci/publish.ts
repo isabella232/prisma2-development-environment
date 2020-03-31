@@ -526,11 +526,11 @@ async function publish() {
     return
   }
 
-  if (args['--dry-run'] && args['--publish']) {
-    throw new Error(
-      `Can't use --dry-run and --publish at the same time. Please choose for either one or the other.`,
-    )
-  }
+  // if (args['--dry-run'] && args['--publish']) {
+  //   throw new Error(
+  //     `Can't use --dry-run and --publish at the same time. Please choose for either one or the other.`,
+  //   )
+  // }
 
   if (args['--publish'] && process.env.BUILDKITE_TAG) {
     if (args['--release']) {
@@ -824,6 +824,9 @@ async function publishPackages(
         )} on latest!!!`,
       ),
     )
+    if (dryRun) {
+      console.log(chalk.red.bold(`But it's only a dry run, so don't worry.`))
+    }
   }
 
   console.log(
