@@ -1,4 +1,5 @@
 node_modules
 migrate
 prisma-client-js
+prisma
 prisma2

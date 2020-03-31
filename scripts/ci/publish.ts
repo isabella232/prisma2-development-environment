@@ -24,15 +24,15 @@ async function getLatestChanges(
   repo?: string,
   dirty?: boolean,
 ): Promise<string[]> {
-  if (repo && !['prisma2', 'migrate', 'prisma-client-js']) {
+  if (repo && !['prisma', 'migrate', 'prisma-client-js']) {
     throw new Error(
-      `Provided repo ${repo} does not exist. Please choose either prisma2, migrate or prisma-client-js.`,
+      `Provided repo ${repo} does not exist. Please choose either prisma, migrate or prisma-client-js.`,
     )
   }
 
   // if (!dirty) {
   //   await Promise.all([
-  //     ensureChangedAreSaved('prisma2'),
+  //     ensureChangedAreSaved('prisma'),
   //     ensureChangedAreSaved('migrate'),
   //     ensureChangedAreSaved('prisma-client-js'),
   //   ])
@@ -41,7 +41,7 @@ async function getLatestChanges(
   const commits = repo
     ? [await getLatestCommit(repo)]
     : await Promise.all([
-        getLatestCommit('prisma2'),
+        getLatestCommit('prisma'),
         getLatestCommit('migrate'),
         getLatestCommit('prisma-client-js'),
       ])
@@ -102,7 +102,7 @@ async function ensureChangedAreSaved(dir: string): Promise<void> {
   const unsavedChanges = await getUnsavedChanges(dir)
   if (unsavedChanges) {
     // special rule needed, as version of prisma is changing when downloading
-    if (dir === 'prisma2' && unsavedChanges === 'M cli/prisma2/package.json') {
+    if (dir === 'prisma' && unsavedChanges === 'M cli/prisma2/package.json') {
       return
     }
     throw new Error(
@@ -231,7 +231,7 @@ export async function getPackages(): Promise<RawPackages> {
   const packagePaths = await globby(
     [
       'migrate/package.json',
-      'prisma2/cli/**/package.json',
+      'prisma/cli/**/package.json',
       'prisma-client-js/packages/**/package.json',
     ],
     {
@@ -356,11 +356,11 @@ async function getNewPackageVersions(
 function getCommitMessages(dir: string, packages: Packages): string[] {
   const messages = Object.values(packages)
     .sort((a, b) => {
-      if (['@prisma/client', 'prisma2'].includes(a.name)) {
+      if (['@prisma/client', 'prisma'].includes(a.name)) {
         return -1
       }
 
-      if (['@prisma/client', 'prisma2'].includes(b.name)) {
+      if (['@prisma/client', 'prisma'].includes(b.name)) {
         return 1
       }
 
@@ -509,7 +509,7 @@ async function publish() {
   }
 
   if (args['--pull']) {
-    const repos = ['migrate', 'prisma-client-js', 'prisma2']
+    const repos = ['migrate', 'prisma-client-js', 'prisma']
     for (const repo of repos) {
       console.log(`\nPulling ${chalk.cyanBright(repo)}`)
       await run(repo, `git pull origin master --no-edit`)
@@ -518,7 +518,7 @@ async function publish() {
   }
 
   if (args['--status']) {
-    const repos = ['migrate', 'prisma-client-js', 'prisma2']
+    const repos = ['migrate', 'prisma-client-js', 'prisma']
     for (const repo of repos) {
       console.log(`\nStatus for ${chalk.cyanBright(repo)}`)
       await run(repo, `git status`)
@@ -710,7 +710,7 @@ async function tagEnginesRepo(dryRun = false) {
   /** Get version */
   const prisma2Path = path.resolve(
     process.cwd(),
-    './prisma2/cli/prisma2/package.json',
+    './prisma/cli/prisma2/package.json',
   )
   const pkg = JSON.parse(await fs.readFile(prisma2Path, 'utf-8'))
   const engineVersion = pkg.prisma.version
@@ -807,7 +807,7 @@ async function publishPackages(
   prisma2Version: string,
   releaseVersion?: string,
 ): Promise<void> {
-  // we need to release a new prisma2 cli in all cases.
+  // we need to release a new @prisma/cli in all cases.
   // if there is a change in photon, photon will also use this new version
 
   const publishStr = dryRun
@@ -913,7 +913,7 @@ async function publishPackages(
   // for now only push when studio is being updated
   if (!process.env.BUILDKITE || process.env.UPDATE_STUDIO) {
     // commit and push it :)
-    const repos = ['migrate', 'prisma-client-js', 'prisma2']
+    const repos = ['migrate', 'prisma-client-js', 'prisma']
     for (const repo of repos) {
       const messages = await getCommitMessages(repo, changedPackages)
       if (messages.length > 0) {

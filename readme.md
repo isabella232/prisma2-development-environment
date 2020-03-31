@@ -15,7 +15,7 @@ Note for Windows: Use the latest version of [Git Bash](https://gitforwindows.org
 1. `cd migrate/fixtures/blog`
 2. `ts-node ../../src/bin.ts up`
 
-### Developing `prisma2 init` Command
+### Developing `prisma init` Command
 
 1. `cd prisma2/cli/introspection`
 2. `mkdir test && cd test`

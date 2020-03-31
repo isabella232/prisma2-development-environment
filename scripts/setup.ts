@@ -21,7 +21,7 @@ async function main() {
   await Promise.all([
     cloneOrPull('migrate'),
     cloneOrPull('prisma-client-js'),
-    cloneOrPull('prisma2'),
+    cloneOrPull('prisma'),
   ])
 
   if (process.env.PATCH_BRANCH) {
@@ -129,7 +129,7 @@ async function runResult(cwd: string, cmd: string): Promise<string> {
 }
 
 async function checkoutPatchBranches(patchBranch: string) {
-  const repos = ['migrate', 'prisma2', 'prisma-client-js']
+  const repos = ['migrate', 'prisma', 'prisma-client-js']
   for (const repo of repos) {
     const repoPath = path.join(__dirname, '../', repo)
     if (await branchExists(repoPath, patchBranch)) {
