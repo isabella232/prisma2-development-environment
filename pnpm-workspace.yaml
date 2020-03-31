@@ -1,4 +1,4 @@
 packages:
   - 'migrate'
   - 'prisma-client-js/packages/*'
-  - 'prisma2/cli/*'
+  - 'prisma/cli/*'
