@@ -501,6 +501,10 @@ async function publish() {
     throw new Error(`Missing env var GITHUB_TOKEN`)
   }
 
+  if (process.env.DRY_RUN) {
+    args['--dry-run'] = true
+  }
+
   if (args['--pull']) {
     const repos = ['migrate', 'prisma-client-js', 'prisma2']
     for (const repo of repos) {

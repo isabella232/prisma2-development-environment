@@ -21,6 +21,7 @@ services:
       - PRISMA2_COMMIT
       - DEVELOPMENT_ENVIRONMENT_COMMIT
       - PATCH_BRANCH
+      - DRY_RUN
     depends_on:
       - postgres
       - mysql
