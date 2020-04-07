@@ -10,6 +10,10 @@ services:
       - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
       - TEST_MYSQL_URI=mysql://prisma:prisma@mysql:3306/tests
       - TEST_MARIADB_URI=mysql://prisma:prisma@mysql:4306/tests
+    depends_on:
+      - postgres
+      - mysql
+      - mariadb
 
   postgres:
     image: postgres:10.3

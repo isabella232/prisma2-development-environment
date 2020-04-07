@@ -23,6 +23,10 @@ services:
       - DEVELOPMENT_ENVIRONMENT_COMMIT
       - PATCH_BRANCH
       - DRY_RUN
+    depends_on:
+      - postgres
+      - mysql
+      - mariadb
 
   postgres:
     image: postgres:10.3
