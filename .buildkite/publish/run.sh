@@ -10,12 +10,12 @@ fi
 npm i -g pnpm
 npm i -g yarn || echo "Ok"
 yarn --version || echo "Ok"
-pnpm i --frozen-lockfile=false
+pnpm i --no-prefer-frozen-lockfile
 
 pnpm run setup
 
 cd prisma/cli/prisma2
-pnpm i --frozen-lockfile=false sqlite3@4.1.1 --unsafe-perm
+pnpm i --no-prefer-frozen-lockfile sqlite3@4.1.1 --unsafe-perm
 cd ../../..
 
 pnpm run test
