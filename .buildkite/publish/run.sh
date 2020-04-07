@@ -7,15 +7,15 @@ if [ "$DEVELOPMENT_ENVIRONMENT_COMMIT" ]; then
   git checkout $DEVELOPMENT_ENVIRONMENT_COMMIT
 fi
 
-npm i -g pnpm@4.9.3
+npm i -g pnpm
 npm i -g yarn || echo "Ok"
 yarn --version || echo "Ok"
-pnpm i
+pnpm i --frozen-lockfile=false
 
 pnpm run setup
 
 cd prisma/cli/prisma2
-pnpm i sqlite3@4.1.1 --unsafe-perm
+pnpm i --frozen-lockfile=false sqlite3@4.1.1 --unsafe-perm
 cd ../../..
 
 pnpm run test
