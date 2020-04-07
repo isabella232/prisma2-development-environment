@@ -1,4 +1,4 @@
-version: "3.7"
+version: '3.7'
 services:
   app:
     image: node:10
@@ -9,9 +9,7 @@ services:
     environment:
       - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
       - TEST_MYSQL_URI=mysql://prisma:prisma@mysql:3306/tests
-    depends_on:
-      - postgres
-      - mysql
+      - TEST_MARIADB_URI=mysql://prisma:prisma@mysql:4306/tests
 
   postgres:
     image: postgres:10.3
@@ -33,8 +31,22 @@ services:
     volumes:
       - mysql:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - '3306:3306'
+
+  mariadb:
+    image: mariadb:10.5
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=tests
+      - MYSQL_USER=prisma
+      - MYSQL_PASSWORD=prisma
+    volumes:
+      - mariadb:/var/lib/mysql
+    ports:
+      - '4306:3306'
 
 volumes:
   postgres:
   mysql:
+  mariadb:
