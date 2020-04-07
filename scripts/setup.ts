@@ -37,9 +37,12 @@ async function main() {
 
   console.log(publishOrder)
 
-  await run('.', `pnpm i -r --ignore-scripts`).catch(e => {})
+  await run(
+    '.',
+    `pnpm i --no-prefer-frozen-lockfile -r --ignore-scripts`,
+  ).catch((e) => {})
   for (const batch of publishOrder) {
-    await pMap(batch, async pkgName => {
+    await pMap(batch, async (pkgName) => {
       const pkg = packages[pkgName]
       const pkgDir = path.dirname(pkg.path)
       await run(pkgDir, 'pnpm run build')
@@ -67,7 +70,7 @@ async function main() {
   }
 
   // final install on top level
-  await run('.', 'pnpm i -r')
+  await run('.', 'pnpm i --no-prefer-frozen-lockfile -r')
 }
 
 if (!module.parent) {
