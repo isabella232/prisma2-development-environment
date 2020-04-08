@@ -13,7 +13,7 @@ services:
     depends_on:
       - postgres
       - mysql
-      # - mariadb
+      - mariadb
 
   postgres:
     image: postgres:10.3
@@ -37,20 +37,20 @@ services:
     ports:
       - '3306:3306'
 
-  # mariadb:
-  #   image: mariadb:10.5
-  #   restart: always
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=root
-  #     - MYSQL_DATABASE=tests
-  #     - MYSQL_USER=prisma
-  #     - MYSQL_PASSWORD=prisma
-  #   volumes:
-  #     - mariadb:/var/lib/mysql
-  #   ports:
-  #     - '4306:3306'
+  mariadb:
+    image: mariadb:10.5
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=tests
+      - MYSQL_USER=prisma
+      - MYSQL_PASSWORD=prisma
+    volumes:
+      - mariadb:/var/lib/mysql
+    ports:
+      - '4306:3306'
 
 volumes:
   postgres:
   mysql:
-  # mariadb:
+  mariadb:
