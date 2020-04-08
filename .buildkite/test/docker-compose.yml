@@ -34,8 +34,6 @@ services:
       - MYSQL_PASSWORD=prisma
     volumes:
       - mysql:/var/lib/mysql
-    ports:
-      - '3306:3306'
 
   mariadb:
     image: mariadb:10.4
@@ -47,8 +45,6 @@ services:
       - MYSQL_PASSWORD=prisma
     volumes:
       - mariadb:/var/lib/mysql
-    ports:
-      - '3306:3306'
 
 volumes:
   postgres:
