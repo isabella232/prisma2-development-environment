@@ -33,3 +33,10 @@ Note for Windows: Use the latest version of [Git Bash](https://gitforwindows.org
 # In the root directory
 pnpm run download
 ```
+
+### Running the CI system locally
+```bash
+cd .buildkite/publish
+docker-compose up -d
+docker-compose logs -f app
+```
