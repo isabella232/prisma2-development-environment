@@ -17,13 +17,13 @@ Note for Windows: Use the latest version of [Git Bash](https://gitforwindows.org
 
 ### Developing `prisma init` Command
 
-1. `cd prisma2/cli/introspection`
+1. `cd prisma/cli/introspection`
 2. `mkdir test && cd test`
 3. `ts-node ../src/bin.ts`
 
 ### Developing `@prisma/cli` CLI
 
-1. `cd prisma2/cli/prisma2`
+1. `cd prisma/cli/prisma2`
 2. `mkdir test && cd test`
 3. `ts-node ../src/bin.ts generate`
 
