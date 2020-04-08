@@ -9,7 +9,7 @@ services:
     environment:
       - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
       - TEST_MYSQL_URI=mysql://prisma:prisma@mysql:3306/tests
-      - TEST_MARIADB_URI=mysql://prisma:prisma@mysql:4306/tests
+      - TEST_MARIADB_URI=mysql://prisma:prisma@mariadb:4306/tests
       - NPM_TOKEN
       - GITHUB_TOKEN
       - UPDATE_STUDIO
