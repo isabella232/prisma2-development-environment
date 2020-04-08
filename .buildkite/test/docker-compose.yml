@@ -9,7 +9,7 @@ services:
     environment:
       - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
       - TEST_MYSQL_URI=mysql://prisma:prisma@mysql:3306/tests
-      - TEST_MARIADB_URI=mysql://prisma:prisma@mariadb:3307/tests
+      - TEST_MARIADB_URI=mysql://prisma:prisma@mariadb:3306/tests
     depends_on:
       - postgres
       - mysql
@@ -48,7 +48,7 @@ services:
     volumes:
       - mariadb:/var/lib/mysql
     ports:
-      - '3307:3307'
+      - '3306:3306'
 
 volumes:
   postgres:
