@@ -20,6 +20,9 @@ cd ../../..
 
 pnpm run test
 
+# disable printing with +x and return as before just after
+set +x
 echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+set -ex
 
 pnpm run publish-all
